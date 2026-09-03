@@ -114,7 +114,9 @@ Tasks are created with the following `candidateType` values. The candidate pool 
 
 ### Add-sign / Remove-sign
 
-Dynamically insert approvers mid-approval (add-sign) or remove countersigners who have not yet acted (remove-sign). Add-sign uses **before add-sign** semantics: the newly added signers review first, and the original approver produces an outcome only after all add-sign subtasks are complete. The engine maintains the parent-child task chain via `wf_task.parent_id + sequence_order`; add-sign creates child tasks, and the main task waits until every task on the chain has finished.
+Dynamically insert approvers mid-approval (add-sign) or remove add-sign / countersign members who have not yet acted (remove-sign). Add-sign uses **before add-sign** semantics: the newly added signers review first, and the original approver produces an outcome only after all add-sign subtasks are complete. The engine maintains the parent-child task chain via `wf_task.parent_id + sequence_order`; add-sign creates child tasks, and the main task waits until every task on the chain has finished.
+
+Remove-sign only touches subtasks that have **not yet been acted on** — members who already produced an outcome cannot be removed. On countersign / vote nodes the `approvalRule` is re-evaluated after removal: once the remaining votes already meet the threshold the node resolves and the flow continues; removing everyone (nobody left to review) terminates the instance. Removals are recorded via the `ReduceSign` event for audit / notification.
 
 ### Return (Send Back)
 
@@ -126,8 +128,10 @@ A task can be returned to the **last completed approval node** for re-processing
 
 ### Transfer / Delegate
 
-- **Transfer**: the task is handed to someone else; the assignee changes, and an audit trail is written to the task variables `transfer_from` / `transfer_reason` / `transfer_time`
-- **Delegate**: the delegate handles the task; `owner` keeps the original owner and `delegate_from` is persisted as an audit trail; after the delegated person acts, `resolve` hands the task back to the original approver
+Both hand the task to someone else — the difference is **who produces the final outcome** (the end-user walkthrough lives in the [Approval Actions Guide](/en/guide/features/approval-actions)):
+
+- **Transfer**: the task is handed to someone else for good; the assignee changes, the original approver is out, and the new assignee's approval moves the flow on. An audit trail is written to the task variables `transfer_from` / `transfer_reason` / `transfer_time`
+- **Delegate**: the delegatee reviews first, while `owner` keeps the original owner and `delegate_from` is persisted as an audit trail. When the delegatee approves or rejects, the task does **not** advance — it returns to the original approver automatically with a notification (`TaskEventResolved`), and the delegatee's comment stays on the timeline; the original approver then reviews once more to produce the final outcome. Delegating to yourself is rejected
 
 ### Claim / Grab
 

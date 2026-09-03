@@ -63,14 +63,15 @@ Approval action endpoints (claim / approve / reject / transfer / delegate / add-
 | GET | `/overdue` · `/backlog` | Overdue tasks / backlog-by-process dashboard (admin monitoring) |
 | GET | `/history` · `/history/{id}` | Historical tasks (archive tables) |
 | POST | `/urge/{id}` | Urge (notify the task handler to process it as soon as possible) |
-| POST | `/{id}/claim` · `/{id}/unclaim` | Claim / unclaim (grab mode) |
+| POST | `/{id}/claim` · `/{id}/unclaim` | Claim / unclaim (grab mode), no request body |
 | POST | `/{id}/approve` | **Approve** (with a comment) |
 | POST | `/{id}/reject` | Reject |
-| POST | `/{id}/return` | Return (only supports returning to the previous completed approval node) |
-| POST | `/{id}/transfer` | Transfer |
-| POST | `/{id}/delegate` | Delegate |
-| POST | `/{id}/resolve` | Resolve a delegation (the delegatee resolves it and hands it back to the original approver) |
-| POST | `/{id}/add-sign` · `/{id}/reduce-sign` | Add-sign / reduce-sign |
+| POST | `/{id}/return` | Return: `{ "targetActivityId": "node_xxx", "reason": "…" }` (only the previous completed approval node) |
+| POST | `/{id}/transfer` | Transfer: `{ "assigneeUserId": "u_lina", "reason": "…" }` |
+| POST | `/{id}/delegate` | Delegate: `{ "assigneeUserId": "u_lina", "reason": "…" }`; the task returns to the original approver automatically once the delegatee approves or rejects |
+| POST | `/{id}/resolve` | Resolve a delegation (no request body): the task goes back to the original approver; no manual call needed after the delegatee acts |
+| POST | `/{id}/add-sign` | Add-sign: `{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }` |
+| POST | `/{id}/reduce-sign` | Reduce-sign: `{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }`; only removes members who have not yet acted |
 | POST | `/{id}/withdraw` | Withdraw (the applicant withdraws a submitted application; the instance is located via the task and terminated) |
 | POST | `/{id}/suspend` · `/{id}/activate` | Suspend / resume the task |
 | POST | `/{id}/complete` | Complete (non-approval tasks) |

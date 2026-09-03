@@ -63,14 +63,15 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 | GET | `/overdue` · `/backlog` | 超时任务 / 按流程积压看板（管理员监控） |
 | GET | `/history` · `/history/{id}` | 历史任务（归档表） |
 | POST | `/urge/{id}` | 催办（通知任务办理人尽快处理） |
-| POST | `/{id}/claim` · `/{id}/unclaim` | 签收 / 取消签收（抢单） |
+| POST | `/{id}/claim` · `/{id}/unclaim` | 签收 / 取消签收（抢单），无请求体 |
 | POST | `/{id}/approve` | **通过**（带意见） |
 | POST | `/{id}/reject` | 拒绝 |
-| POST | `/{id}/return` | 退回（仅支持退回上一个已办审批节点） |
-| POST | `/{id}/transfer` | 转办 |
-| POST | `/{id}/delegate` | 委托 |
-| POST | `/{id}/resolve` | 归还委派（被委派人处理后归还原审批人） |
-| POST | `/{id}/add-sign` · `/{id}/reduce-sign` | 加签 / 减签 |
+| POST | `/{id}/return` | 退回：`{ "targetActivityId": "node_xxx", "reason": "…" }`（仅上一个已办审批节点） |
+| POST | `/{id}/transfer` | 转办：`{ "assigneeUserId": "u_lina", "reason": "…" }` |
+| POST | `/{id}/delegate` | 委派：`{ "assigneeUserId": "u_lina", "reason": "…" }`，被委派人通过 / 拒绝后任务自动归还原审批人 |
+| POST | `/{id}/resolve` | 归还委派（无请求体）：任务回到原审批人名下，被委派人审批后无需手动调用 |
+| POST | `/{id}/add-sign` | 加签：`{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }` |
+| POST | `/{id}/reduce-sign` | 减签：`{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }`，仅移除未办理的加签/会签人 |
 | POST | `/{id}/withdraw` | 撤回（申请人撤回已提交的申请，按任务定位实例并终止） |
 | POST | `/{id}/suspend` · `/{id}/activate` | 任务挂起 / 恢复 |
 | POST | `/{id}/complete` | 完成（非审批类任务） |

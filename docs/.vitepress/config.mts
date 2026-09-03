@@ -26,6 +26,7 @@ export default withMermaid(defineConfig({
             text: '核心功能',
             items: [
               { text: '审批语义', link: '/guide/features/approval-semantics' },
+              { text: '审批动作指南', link: '/guide/features/approval-actions' },
               { text: '流程设计器', link: '/guide/features/designer' },
               { text: '表单设计器', link: '/guide/features/form-engine' },
               { text: '规则链设计器', link: '/guide/features/rulechain-designer' },
@@ -68,6 +69,7 @@ export default withMermaid(defineConfig({
               text: 'GFlow Engine（开源引擎）',
               items: [
                 { text: '中国式审批语义', link: '/guide/features/approval-semantics' },
+                { text: '审批动作指南', link: '/guide/features/approval-actions' },
                 { text: '节点类型总览', link: '/guide/features/nodes' },
               ]
             },
@@ -164,6 +166,7 @@ export default withMermaid(defineConfig({
             text: 'Features',
             items: [
               { text: 'Approval Semantics', link: '/en/guide/features/approval-semantics' },
+              { text: 'Approval Actions Guide', link: '/en/guide/features/approval-actions' },
               { text: 'Process Designer', link: '/en/guide/features/designer' },
               { text: 'Form Designer', link: '/en/guide/features/form-engine' },
               { text: 'Rule Chain Designer', link: '/en/guide/features/rulechain-designer' },
@@ -206,6 +209,7 @@ export default withMermaid(defineConfig({
               text: 'GFlow Engine (Open-Source Engine)',
               items: [
                 { text: 'Chinese-Style Approval Semantics', link: '/en/guide/features/approval-semantics' },
+                { text: 'Approval Actions Guide', link: '/en/guide/features/approval-actions' },
                 { text: 'Node Types Overview', link: '/en/guide/features/nodes' },
               ]
             },
