@@ -65,4 +65,4 @@ The same schema serves three scenarios:
 
 ## External Forms
 
-Already have forms in an existing business system? `formType: "external"` + `formUrl` hooks the existing page directly, and the approval detail opens it read-only in an iframe — the engine only manages the process and never takes over your forms.
+Already have forms in an existing business system? `formType: "external"` + `formUrl` hooks the existing page directly, approvers see the submitted variables as a read-only data table — the engine only manages the process and never takes over your forms.

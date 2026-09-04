@@ -31,7 +31,7 @@
 ```
 
 - `processType: main` 主流程 / `sub` 子流程
-- 表单三态：`formType: "design"`（默认，内嵌 `form` schema）/ `formType: "system"` + `formKey` 引用 `forms` 表里的共享模板 / `formType: "external"` + `formUrl` 挂外部表单（iframe 只读展示）
+- 表单三态：`formType: "design"`（默认，内嵌 `form` schema）/ `formType: "system"` + `formKey` 引用 `forms` 表里的共享模板 / `formType: "external"` + `formUrl` 挂外部表单（发起时 iframe 填写，审批时按已提交变量渲染只读数据表）
 
 ## 节点
 

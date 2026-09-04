@@ -31,7 +31,7 @@ flowchart TB
 
 - **发起视角**：iframe 加载外部页，gflow 向它发送 `gflow:form-init` 初始化上下文；用户填写后外部页通过 `postMessage` 回传数据与校验结果。
 - **提交**：回传的数据整体作为流程变量写入实例（字段名即变量名，条件分支里用 `msg.amount` 这样的表达式消费）。
-- **审批视角**：外部表单**恒只读**——外部页面没有回显/编辑协议，gflow 用已提交的变量渲染一张只读数据表，保证审批人可见；不支持字段权限配置。
+- **审批视角**：外部表单**恒只读**——外部页面没有回显/编辑协议，gflow 用已提交的变量渲染一张只读数据表，保证审批人可见；不支持字段权限配置。数据表的行标签按[字段显示名](#字段显示名三级来源)渲染，审批人看到的是中文字段名而不是变量名。
 
 ## 接入步骤
 
@@ -41,6 +41,7 @@ flowchart TB
 
 - **表单类型**：选「外部表单」
 - **PC 端 URL**：你的表单页面地址（必填，须以 `http(s)://` 开头，或以 `/` 开头的同站路径）
+- **字段显示名**（可选）：声明变量名到中文标签的映射（如 `amount → 报销金额`），审批详情的数据表按它渲染行标签。外部页面也可以在回传数据时自带字段声明（见第 3 步），模板配置作为兜底
 - 表单编码（code）记一下，流程要引用它
 
 > 页面还没写？先把第 3 步的最小示例部署上去占位——模板 URL 改动对已发布流程即时生效，随时可换真实地址。
@@ -73,7 +74,7 @@ flowchart TB
 | --- | --- | --- | --- |
 | 页面 → gflow | `gflow:form-ready` | 无 | 页面加载完成后主动上报，宿主收到会立即补发 init；此时页面还不知道宿主 origin，`targetOrigin` 用 `'*'` 是安全的（消息不带任何数据，宿主侧仍会校验页面 origin） |
 | gflow → 页面 | `gflow:form-init` | `{ processKey, processName }` | iframe 加载完成时下发，可按 processKey 定制展示；收到 ready 也会补发；页面内部跳转/刷新会重发 |
-| 页面 → gflow | `gflow:form-data` | `{ data: {...} }` | 用户填写后上报，**可多次上报（后到覆盖）**；提交时以最后一份为准 |
+| 页面 → gflow | `gflow:form-data` | `{ data: {...}, fields?: [{key, label}] }` | 用户填写后上报，**可多次上报（后到覆盖）**；提交时以最后一份为准。`fields` 为可选的字段显示名声明，随数据存入实例，审批详情的数据表按 `label` 渲染行标签（推荐上报，接入方最清楚字段的中文叫法） |
 | 页面 → gflow | `gflow:form-validate` | `{ valid: boolean }` | 上报过 `valid: false` 会被提交动作拦截；从未上报则不拦截 |
 
 `ready` 是可选的握手消息：静态页可省略（宿主在 iframe load 时已下发 init）；**单页应用（Vue/React 等）建议上报**——异步挂载可能错过 load 时的一次性 init。
@@ -102,7 +103,7 @@ flowchart TB
     })
 
     // 2) 上报表单数据：data 的键就是流程变量名（条件分支里 msg.amount 消费）
-    //    targetOrigin 必须回填宿主 origin，不要用 '*'
+    //    fields 声明字段显示名，审批详情按 label 渲染；targetOrigin 必须回填宿主 origin，不要用 '*'
     function report() {
       if (!hostOrigin) return
       window.parent.postMessage({
@@ -110,7 +111,11 @@ flowchart TB
         data: {
           amount: Number(document.getElementById('amount').value),
           reason: document.getElementById('reason').value
-        }
+        },
+        fields: [
+          { key: 'amount', label: '报销金额' },
+          { key: 'reason', label: '事由' }
+        ]
       }, hostOrigin)
       window.parent.postMessage({ type: 'gflow:form-validate', valid: true }, hostOrigin)
     }
@@ -125,7 +130,18 @@ flowchart TB
 
 - 发起人在发起申请页打开该流程 → 抽屉里渲染你的外部页面 → 填写 → 点抽屉底部「提交」。
 - 提交校验规则：回传过 `valid: false` → 拦截并提示；从未回传数据（`form-data` 为空）→ 拦截并提示；只回传数据未回传校验结果 → 放行。
-- 审批人在待办详情看到的是**只读数据表**（键值对），不是 iframe。
+- 「暂存」（草稿）同样要求已回传数据：外部页面数据不会随草稿保存、草稿也没有补填通道，空数据草稿提交后在审批端看不到任何表单内容，因此在暂存入口即拦截；服务端对草稿转正式（submit-draft）也做同样校验兜底。
+- 审批人在待办详情看到的是**只读数据表**，行标签优先用你上报的字段显示名。
+
+#### 字段显示名三级来源
+
+审批详情数据表的行标签按以下优先级逐键合并（先命中先生效，后到的覆盖先到的）：
+
+1. **实例快照**：发起时随 `gflow:form-data` 上报的 `fields`，存于流程变量保留键 `__formFields`——记录发起时刻的真实字段集，优先级最高；
+2. **表单模板**：「表单管理」里外部表单模板上配置的「字段显示名」（存于模板 `schemaJSON`）；
+3. **DSL 内联**：API 部署的流程在 `ruleChain.additionalInfo.formFields` 里声明的映射。
+
+四级兜底是变量名本身。`__formFields` 是宿主保留键，不会出现在数据表、摘要与通知文案里。
 
 ## 对接端交互时序
 
@@ -156,9 +172,10 @@ sequenceDiagram
 2. **上报 ready（可选握手）**：页面就绪即 `window.parent.postMessage({ type: 'gflow:form-ready' }, '*')`，宿主收到会立即补发 init。不带数据所以 `'*'` 是安全的；静态页可省略，**SPA 强烈建议**。
 3. **捕获宿主 origin**：从 init 事件的 `event.origin` 记下宿主地址，后续所有回传的 `targetOrigin` 都用它，**绝不用 `'*'`**。
 4. **边填边传**：`input` 事件防抖 300ms 上报 `gflow:form-data`；连接建立（收到 init）时先报一次初始值。宿主提交永远取最后一份。
-5. **上报校验**：每次上报数据的同时报 `gflow:form-validate`；`valid: false` 会拦截宿主提交（提示在宿主侧，具体字段错误由你的页面自己渲染）。
-6. **页内跳转要重新接**：iframe 内部导航/刷新会重新触发 load，宿主会**重发 init**——新页面必须重新注册监听（单页应用内路由切换不受影响）。
-7. **未嵌入兜底**：一段时间收不到 init（页面被直接打开），提示“请在 gflow 发起抽屉中打开”，禁用相关逻辑即可。
+5. **上报字段显示名**：`form-data` 载荷里带 `fields: [{key, label}]`，声明每个变量的中文标签——审批详情的数据表按它渲染，未声明的字段退回变量名。显示名优先级见[下方说明](#字段显示名三级来源)。
+6. **上报校验**：每次上报数据的同时报 `gflow:form-validate`；`valid: false` 会拦截宿主提交（提示在宿主侧，具体字段错误由你的页面自己渲染）。
+7. **页内跳转要重新接**：iframe 内部导航/刷新会重新触发 load，宿主会**重发 init**——新页面必须重新注册监听（单页应用内路由切换不受影响）。
+8. **未嵌入兜底**：一段时间收不到 init（页面被直接打开），提示“请在 gflow 发起抽屉中打开”，禁用相关逻辑即可。
 
 完整可运行的参考实现见 gflow 仓库 `docs/demo/external_form_demo.html`（线上演示环境的
 [/gflow/demo/external-form.html](http://8.134.32.225:8081/gflow/demo/external-form.html)
@@ -195,7 +212,7 @@ sequenceDiagram
 跨站 iframe 默认不携带第三方 Cookie（浏览器 SameSite=Lax 语义）。按优先级：把表单页部署为 gflow 同站路径（URL 以 `/` 开头，同源共享 Cookie）；或给表单页域名的 Cookie 设 `SameSite=None; Secure`；或页面改用 URL 参数 token 等不依赖 Cookie 的鉴权。
 
 **Q：审批详情里字段名能显示中文吗？**
-只读数据表原样展示 `data` 的键值，没有键名到中文标签的映射。要审批人看得舒服：字段命名兼顾可读性，或直接用中文键（表达式引用与维护稍麻烦，建议评估后取舍）。
+能，三种方式任选：回传数据时随 `form-data` 带 `fields` 声明（推荐，随数据自动同步）；在表单模板上配置「字段显示名」；API 部署流程时在 DSL `additionalInfo.formFields` 里声明。优先级与规则见[字段显示名三级来源](#字段显示名三级来源)。都没配置时退回变量名——建议英文变量名 + `fields` 声明中文标签的组合。
 
 **Q：提交时报「外部表单尚未提交数据」？**
 说明 gflow 没收到过你的 `form-data`：最常见原因是回传时 `targetOrigin` 写错（写成 `'*'`，或写成了页面自己的 origin），或页面与表单模板 URL 不同源导致被 gflow 的 origin 校验拒绝。

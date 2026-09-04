@@ -31,7 +31,7 @@ A process definition is a RuleGo rule chain: <code>{ruleChain, metadata}</code>.
 ```
 
 - `processType: main` main process / `sub` sub-process
-- Three form modes: `formType: "design"` (default, embeds the `form` schema) / `formType: "system"` + `formKey` referencing a shared template in the `forms` table / `formType: "external"` + `formUrl` attaching an external form (rendered read-only in an iframe)
+- Three form modes: `formType: "design"` (default, embeds the `form` schema) / `formType: "system"` + `formKey` referencing a shared template in the `forms` table / `formType: "external"` + `formUrl` attaching an external form (filled in an iframe at submission; approvals show a read-only data table of the submitted variables)
 
 ## Nodes
 
