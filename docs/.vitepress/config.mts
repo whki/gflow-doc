@@ -6,7 +6,7 @@ export const DEMO_URL = 'http://8.134.32.225:8081'
 
 export default withMermaid(defineConfig({
   title: 'GFlow 极风工作流平台',
-  description: '审批如风，极速流转。批完，自动办：AI 先审、人再签、签完自动执行——开源引擎 GFlow Engine（Apache-2.0）+ 商业平台 GFlow 极风工作流平台。',
+  description: 'AI 先审 · 人再签 · 签完自动办——开源引擎 GFlow Engine（Apache-2.0）+ 商业平台 GFlow 极风工作流平台。',
 
   ignoreDeadLinks: true,
 
@@ -299,8 +299,8 @@ export default withMermaid(defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#0b1512' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'GFlow 极风工作流平台 | 审批如风，极速流转' }],
-    ['meta', { property: 'og:description', content: '审批如风，极速流转。开源引擎 GFlow Engine + 商业版极风工作流平台：AI 先审、人再签、签完自动执行——7 张核心表、四大自研设计器与智能体。' }],
+    ['meta', { property: 'og:title', content: 'GFlow 极风工作流平台 | AI 先审 · 人再签 · 签完自动办' }],
+    ['meta', { property: 'og:description', content: 'AI 先审 · 人再签 · 签完自动办。开源引擎 GFlow Engine + 商业版极风工作流平台——7 张核心表、四大自研设计器与智能体。' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.loli.net' }],
     ['link', { rel: 'stylesheet', href: 'https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap' }]

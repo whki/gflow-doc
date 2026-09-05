@@ -1,7 +1,7 @@
 # 什么是 GFlow
 
 <div class="lead">
-GFlow 极风工作流平台——审批如风，极速流转。它把<strong>审批</strong>与<strong>自动化</strong>编排在同一条流程里，以两种形态交付：<strong>GFlow Engine</strong> 是可嵌入的 Go 审批引擎（Apache-2.0 开源），<strong>GFlow Platform</strong> 是开箱即用的审批平台（<a href="/pricing.html">商业授权，源码交付</a>）。
+GFlow 极风工作流平台——AI 先审 · 人再签 · 签完自动办。它把<strong>审批</strong>与<strong>自动化</strong>编排在同一条流程里，以两种形态交付：<strong>GFlow Engine</strong> 是可嵌入的 Go 审批引擎（Apache-2.0 开源），<strong>GFlow Platform</strong> 是开箱即用的审批平台（<a href="/pricing.html">商业授权，源码交付</a>）。
 </div>
 
 > **批完，自动办。** 这是与其他审批引擎的根本差异：`automation`（调规则链）与 `aiAgent`（调智能体）是**引擎原生节点**，和审批节点写在同一条 DSL 里编排——AI 先审、人再签、签完自动执行。会签、加签、退回等中国式审批语义是完备的地基，见[中国式审批语义](/guide/features/approval-semantics)。

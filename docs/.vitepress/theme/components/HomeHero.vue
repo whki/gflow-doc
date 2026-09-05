@@ -10,10 +10,10 @@ const { isEn, link } = useI18n()
 const T = computed(() =>
   isEn.value
     ? {
-        announce: 'AI pre-screens · Humans approve · Automation follows — see approval as automation',
-        titleA: 'Approvals like the wind,',
-        titleB: 'flow at full speed.',
-        subtitle: 'GFlow Workflow Platform · Once approved, it runs itself',
+        announce: 'Once approved, it runs itself — see approval as automation',
+        titleA: 'AI pre-screens · Humans approve ·',
+        titleB: 'automation follows.',
+        subtitle: 'GFlow Workflow Platform',
         descLines: [
           { s: 'AI pre-screens', t: ': LLMs judge the risk; low-risk items pass straight through' },
           { s: 'Humans approve', t: ': countersign, add-sign, return anywhere — every Chinese-style approval action' },
@@ -45,10 +45,10 @@ const T = computed(() =>
         ],
       }
     : {
-        announce: 'AI 先审 · 人再签 · 签完自动办 —— 了解「审批即自动化」',
-        titleA: '审批如风，',
-        titleB: '极速流转。',
-        subtitle: 'GFlow 极风工作流平台 · 批完，自动办',
+        announce: '批完，自动办 —— 了解「审批即自动化」',
+        titleA: 'AI 先审 · 人再签 ·',
+        titleB: '签完自动办。',
+        subtitle: 'GFlow 极风工作流平台',
         descLines: [
           { s: 'AI 先审', t: '：大模型判风险，低风险自动直通' },
           { s: '人再签', t: '：会签、加签、任意退回，中国式审批一个不少' },
