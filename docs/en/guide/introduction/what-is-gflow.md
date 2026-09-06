@@ -21,7 +21,7 @@ GFlow Engine and GFlow Platform share the same DSL and data model; the only diff
 
 > The DSL is a JSON-format, BPMN-like approval flow; it does not parse BPMN 2.0 XML.
 
-**GFlow Platform** adds everything an enterprise needs on top of the engine to put it to real use. At its core are **four self-developed components**: the Process Designer (tree-based), the Form Designer (gform-designer), the Rule Chain Designer (visually orchestrating automation), and the AI Agent (AI approval / skills / agent management). Plus a frontend application for initiate / todo / done / CC / statistics, an admin backend for organization structure and multi-tenancy, automation orchestration, monitoring, and notifications. **The frontend, the four designers, the AI agent, and automation are all built in-house — no third-party black boxes.**
+**GFlow Platform** adds everything an enterprise needs on top of the engine to put it to real use. At its core are **four self-developed components**: the Process Designer (tree-based), the Form Designer (gform-designer), the Rule Chain Designer (visually orchestrating automation), and the AI Agent (AI approval / skills / agent management). Plus a frontend application for initiate / todo / done / CC / statistics, an admin backend for organization structure and multi-tenancy, automation orchestration, monitoring, notifications, and multi-instance cluster deployment. **The frontend, the four designers, the AI agent, and automation are all built in-house — no third-party black boxes.**
 
 ## Core Features
 

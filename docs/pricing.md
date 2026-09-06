@@ -43,6 +43,7 @@ aside: false
     <tr><td>自动化编排界面</td><td class="pt-no">— 自行实现</td><td class="pt-yes">✓ 触发器 + HTTP/服务任务配置</td></tr>
     <tr><td>组织架构 / 用户 / 角色 / 岗位</td><td class="pt-no">— 自行实现 IdentityService</td><td class="pt-yes">✓ 完整后台</td></tr>
     <tr><td>监控 / 通知 / 操作审计</td><td class="pt-no">— 监听器回调自建</td><td class="pt-yes">✓ 内置</td></tr>
+    <tr><td>多实例集群部署</td><td class="pt-no">— 锁 / 救援原语内嵌，编排自建</td><td class="pt-yes">✓ 双实例 active-active · 选主 / 自动救援 / 配置热生效</td></tr>
     <tr><td colspan="3" class="price-section-title">交付与服务</td></tr>
     <tr><td>许可证</td><td>Apache-2.0</td><td>商业授权（一次性）</td></tr>
     <tr><td>交付物</td><td>开源仓库</td><td>服务端 + 前端全部源码</td></tr>

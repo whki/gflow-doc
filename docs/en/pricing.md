@@ -43,6 +43,7 @@ aside: false
     <tr><td>Automation orchestration UI</td><td class="pt-no">— implement it yourself</td><td class="pt-yes">✓ triggers + HTTP / service task configuration</td></tr>
     <tr><td>Organization / users / roles / positions</td><td class="pt-no">— implement IdentityService yourself</td><td class="pt-yes">✓ full admin backend</td></tr>
     <tr><td>Monitoring / notifications / operation audit</td><td class="pt-no">— build your own from listener callbacks</td><td class="pt-yes">✓ built in</td></tr>
+    <tr><td>Multi-instance cluster deployment</td><td class="pt-no">— lock / rescue primitives built in, wiring is yours</td><td class="pt-yes">✓ dual-instance active-active · leader election / auto rescue / hot config reload</td></tr>
     <tr><td colspan="3" class="price-section-title">Delivery & services</td></tr>
     <tr><td>License</td><td>Apache-2.0</td><td>Commercial license (one-time)</td></tr>
     <tr><td>Deliverables</td><td>Open source repository</td><td>Full source code for server + frontend</td></tr>
