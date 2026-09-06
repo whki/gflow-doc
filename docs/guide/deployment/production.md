@@ -1,10 +1,26 @@
 # 部署指南
 
 <div class="lead">
-gflow 是 Go 单二进制 + 前端静态资源，2C2G 起步即可。Docker Compose 一键起全栈，或 systemd 裸机部署。
+gflow 是 Go 单二进制 + 前端静态资源，2C2G 起步即可。推荐 systemd 裸机部署；Docker Compose 也可一键起全栈。
 </div>
 
-## Docker Compose 一键部署（推荐）
+## 裸机 / systemd（推荐）
+
+```bash
+# 后端：Go 编译单二进制。make build 为 API-only 版（不嵌入前端，前端走外部 nginx）；
+# 需要单二进制全栈时用 make release（先构建前端再 go build -tags embed 嵌入）
+cd gflow && make build          # 产出 dist/gflow-server
+./dist/gflow-server             # 在 gflow 目录运行，自动读取 configs/config.yaml
+
+# 前端：构建产物由 nginx 托管（含 base 路径的构建走 make web）
+cd gflow && make web            # 内部执行 vite build，产物在 gflow-ui/dist
+```
+
+`deploy/systemd/` 提供服务单元模板；`deploy/nginx/` 提供前端反代配置。服务端默认监听 `:8080`。
+
+首次部署先执行 `make db-init`（scripts/init-db.sh）完成建库建表——程序启动不建核心表，见下文[数据库初始化](#数据库初始化)。
+
+## Docker Compose 一键部署
 
 ```bash
 cd gflow
@@ -31,20 +47,6 @@ compose 拉起四个服务：
 访问 `http://localhost/gflow/`，默认账号 **admin / admin123**（首次登录改密）。
 
 > 双实例/多副本集群部署是**商业版（GFlow Platform）能力**，不使用此 compose，完整步骤见仓库 `docs/deploy/deployment.md` 第七节。
-
-## 裸机 / systemd
-
-```bash
-# 后端：Go 编译单二进制。make build 为 API-only 版（不嵌入前端，前端走外部 nginx）；
-# 需要单二进制全栈时用 make release（先构建前端再 go build -tags embed 嵌入）
-cd gflow && make build          # 产出 dist/gflow-server
-./dist/gflow-server             # 在 gflow 目录运行，自动读取 configs/config.yaml
-
-# 前端：构建产物由 nginx 托管（含 base 路径的构建走 make web）
-cd gflow && make web            # 内部执行 vite build，产物在 gflow-ui/dist
-```
-
-`deploy/systemd/` 提供服务单元模板；`deploy/nginx/` 提供前端反代配置。服务端默认监听 `:8080`。
 
 ## 集群部署（商业版）
 

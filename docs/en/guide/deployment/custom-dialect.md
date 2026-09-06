@@ -1,4 +1,4 @@
-# Custom Database Dialects (Chinese Domestic Database Adaptation)
+# Custom Database Dialects
 
 <div class="lead">
 GFlow ships with PostgreSQL and MySQL built in; DM (Dameng), KingbaseES, GaussDB, and other databases plug in through the <code>DialectProvider</code> extension point: implement three methods, register once, change one line of config — no connection-logic changes required. Extension drivers must be pure Go, with no CGO/GCC dependency.

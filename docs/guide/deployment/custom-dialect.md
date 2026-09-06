@@ -1,4 +1,4 @@
-# 自定义数据库方言（国产数据库适配）
+# 自定义数据库方言
 
 <div class="lead">
 GFlow 内置 PostgreSQL 与 MySQL；达梦、人大金仓、GaussDB 等数据库通过 <code>DialectProvider</code> 扩展点接入：实现三个方法、一处注册、改一行配置，无需改动任何连接逻辑。扩展驱动须为纯 Go 实现，不引入 CGO/GCC 依赖。

@@ -36,6 +36,7 @@ export default withMermaid(defineConfig({
               { text: '流程 DSL', link: '/guide/dsl' },
               { text: 'REST API', link: '/guide/api' },
               { text: '数据模型', link: '/guide/data-model/' },
+              { text: '部署指南', link: '/guide/deployment/production' },
             ]
           },
           { text: '价格', link: '/pricing' },
@@ -125,7 +126,7 @@ export default withMermaid(defineConfig({
               text: '部署',
               items: [
                 { text: '部署指南', link: '/guide/deployment/production' },
-                { text: '自定义数据库方言（国产数据库适配）', link: '/guide/deployment/custom-dialect' },
+                { text: '自定义数据库方言', link: '/guide/deployment/custom-dialect' },
               ]
             }
           ],
@@ -176,6 +177,7 @@ export default withMermaid(defineConfig({
               { text: 'Process DSL', link: '/en/guide/dsl' },
               { text: 'REST API', link: '/en/guide/api' },
               { text: 'Data Model', link: '/en/guide/data-model/' },
+              { text: 'Deployment Guide', link: '/en/guide/deployment/production' },
             ]
           },
           { text: 'Pricing', link: '/en/pricing' },
@@ -264,7 +266,7 @@ export default withMermaid(defineConfig({
               text: 'Deployment',
               items: [
                 { text: 'Deployment Guide', link: '/en/guide/deployment/production' },
-                { text: 'Custom Database Dialects (Chinese Domestic Databases)', link: '/en/guide/deployment/custom-dialect' },
+                { text: 'Custom Database Dialects', link: '/en/guide/deployment/custom-dialect' },
               ]
             }
           ],

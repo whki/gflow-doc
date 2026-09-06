@@ -1,10 +1,27 @@
 # Deployment Guide
 
 <div class="lead">
-gflow is a single Go binary plus frontend static assets — 2 vCPU / 2 GB RAM is enough to get started. Bring up the full stack with one Docker Compose command, or deploy bare metal with systemd.
+gflow is a single Go binary plus frontend static assets — 2 vCPU / 2 GB RAM is enough to get started. Bare-metal deployment with systemd is recommended; Docker Compose can also bring up the full stack in one command.
 </div>
 
-## Docker Compose One-Command Deployment (Recommended)
+## Bare Metal / systemd (Recommended)
+
+```bash
+# Backend: a Go-compiled single binary. `make build` produces the API-only build (frontend not
+# embedded; the frontend is served by an external nginx); for a single all-in-one binary use
+# `make release` (builds the frontend first, then embeds it via go build -tags embed)
+cd gflow && make build          # produces dist/gflow-server
+./dist/gflow-server             # run from the gflow directory; automatically loads configs/config.yaml
+
+# Frontend: build artifacts are served by nginx (for a build with the base path, use make web)
+cd gflow && make web            # runs vite build internally; artifacts land in gflow-ui/dist
+```
+
+`deploy/systemd/` provides systemd service unit templates; `deploy/nginx/` provides the frontend reverse-proxy configuration. The server listens on `:8080` by default.
+
+For a first deployment, run `make db-init` (scripts/init-db.sh) to create the database and tables — program startup does not create the core tables; see [Database Initialization](#database-initialization) below.
+
+## Docker Compose One-Command Deployment
 
 ```bash
 cd gflow
@@ -31,21 +48,6 @@ Compose brings up four services:
 Open `http://localhost/gflow/` and sign in with the default account **admin / admin123** (change the password on first login).
 
 > Dual-instance / multi-replica cluster deployment is a **commercial-edition (GFlow Platform) capability** and does not use this compose file; see section 7 of `docs/deploy/deployment.md` in the repository.
-
-## Bare Metal / systemd
-
-```bash
-# Backend: a Go-compiled single binary. `make build` produces the API-only build (frontend not
-# embedded; the frontend is served by an external nginx); for a single all-in-one binary use
-# `make release` (builds the frontend first, then embeds it via go build -tags embed)
-cd gflow && make build          # produces dist/gflow-server
-./dist/gflow-server             # run from the gflow directory; automatically loads configs/config.yaml
-
-# Frontend: build artifacts are served by nginx (for a build with the base path, use make web)
-cd gflow && make web            # runs vite build internally; artifacts land in gflow-ui/dist
-```
-
-`deploy/systemd/` provides systemd service unit templates; `deploy/nginx/` provides the frontend reverse-proxy configuration. The server listens on `:8080` by default.
 
 ## Cluster Deployment (Commercial Edition)
 
