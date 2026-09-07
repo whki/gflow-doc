@@ -41,6 +41,7 @@ export default withMermaid(defineConfig({
           },
           { text: '价格', link: '/pricing' },
           { text: '在线演示', link: DEMO_URL },
+          { text: '加入社区', link: 'https://rulego.cc/pages/community/' },
         ],
 
         sidebar: {
@@ -182,6 +183,7 @@ export default withMermaid(defineConfig({
           },
           { text: 'Pricing', link: '/en/pricing' },
           { text: 'Live Demo', link: DEMO_URL },
+          { text: 'Community', link: 'https://rulego.cc/pages/community/' },
         ],
 
         sidebar: {
