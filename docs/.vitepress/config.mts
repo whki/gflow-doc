@@ -307,7 +307,14 @@ export default withMermaid(defineConfig({
     ['meta', { property: 'og:description', content: 'AI 先审 · 人再签 · 签完自动办。开源引擎 GFlow Engine + 商业版极风工作流平台——7 张核心表、四大自研设计器与智能体。' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.loli.net' }],
-    ['link', { rel: 'stylesheet', href: 'https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap' }]
+    ['link', { rel: 'stylesheet', href: 'https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap' }],
+    ['script', {}, `var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement('script');
+  hm.src = 'https://hm.baidu.com/hm.js?b604adb814caa7c6ebfce6e20d89d57a';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(hm, s);
+})();`]
   ],
 
   themeConfig: {
