@@ -112,7 +112,7 @@ When the initiator appears in the approval chain, the node's configured `selfApp
 |---|---|
 | `none` | Default, no filtering; the initiator stays in the approver list as usual |
 | `skip` | Remove the initiator and go straight to the next node (an `initiatorSelf` approver paired with `skip` leaves nobody to review and is rejected by deploy-time validation) |
-| `autoApprove` | Keep the initiator (a reserved auto-approve semantic; the current implementation does not filter) |
+| `autoApprove` | The initiator's task is auto-approved by the system on creation and archived as approved with a system comment; in or-sign mode the initiator's ticket counts toward the decision (claim-pool tasks are unaffected: claim, then approve manually) |
 | `delegateToManager` | The initiator's task is handed to their direct manager |
 | `delegateToDeptManager` | The initiator's task is handed to the department head |
 
@@ -193,7 +193,7 @@ The node's `configuration.reject` decides where the flow goes when an approval i
 | `terminate` | Terminates the instance (default) |
 | `toStarter` | Jumps back to the start node (returns to the initiator to revise and resubmit) |
 | `toPrev` | Jumps to the previous `userTask` node for rework |
-| `toNode` | Jumps to the node named by `target` (required; must be a node ID that exists on the chain) |
+| `toNode` | Jumps to the node named by `target` (required; must be a node ID that exists on the chain **and** be an upstream node of the current one; rollback paths crossing fork/join are rejected at deploy time) |
 
 If the jump target is unreachable (conditions unmet, edge missing, etc.), it falls back to the node's Reject / Failure outgoing edges; with no outgoing edges either, the instance terminates. In multi-person modes, any single rejection triggers the reject (OR-sign first-to-act wins; countersign is a one-vote veto).
 
@@ -221,4 +221,4 @@ On the initiator side there are additional instance-level switches such as `susp
 
 ## Deploy-Time Validation
 
-At deploy/update time the engine validates every node's `configuration`: unknown values, missing required fields, and mutually exclusive combinations (a vote threshold on a non-vote node, `toNode` without `target`, etc.) **reject the deployment outright** with a node-level error message — configuration errors are caught before writing, not at runtime.
+At deploy/update time the engine validates every node's `configuration`: unknown values, missing required fields, and mutually exclusive combinations (a vote threshold on a non-vote node, `toNode` without `target`, a rollback target that is not an upstream node or sits across parallel branches, etc.) **reject the deployment outright** with a node-level error message — configuration errors are caught before writing, not at runtime.
