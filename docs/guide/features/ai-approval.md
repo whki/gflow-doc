@@ -40,7 +40,7 @@ AI 明确拒绝（REJECT）时按拒绝策略终止/退回；`low/mid/high` 等�
     "timeoutSec": 120,
     "inputAssembly": {
       "customPrompt": "重点核查金额 ${msg.amount} 是否超出招待费标准",
-      "contextSources": { "formData": true, "prevComments": true, "processInfo": true, "attachmentsImages": false }
+      "contextSources": { "formData": true, "prevComments": true, "initiator": true }
     },
     "decision": { "rejectStrategy": "terminate", "unresolved": "human" },
     "failureHandler": ["u_finance_admin"],
@@ -50,6 +50,8 @@ AI 明确拒绝（REJECT）时按拒绝策略终止/退回；`low/mid/high` 等�
 }
 ```
 
+`contextSources` 里 `formData` / `processInfo` / `prevComments` / `initiator` 缺省开启（可选 bool，写 `false` 关闭对应上下文）；`attachments` 缺省关闭（bool），`attachmentsImages` / `attachmentsDocs` 仍跟随附件主开关。
+
 ### 裁决路由（decision）
 
 ```mermaid
@@ -57,7 +59,7 @@ flowchart LR
     A["调用智能体<br/>（组装表单 / 意见 / 附件上下文）"] -- 超时 / API 错误 --> H["failureHandler 兜底待办<br/>人工结论直接路由，不再调 AI"]
     A --> B{"提取<br/>AI_DECISION"}
     B -- PASS --> P[流程继续下一节点]
-    B -- REJECT --> R["拒绝策略：terminate 终止<br/>backToInitiator 退回发起人"]
+    B -- REJECT --> R["拒绝策略：terminate 终止<br/>toStarter 退回发起人"]
     B -- "标记缺失 / 无法识别" --> U{"unresolved 策略"}
     U -- "human（默认）" --> H
     U -- pass --> P
@@ -66,7 +68,7 @@ flowchart LR
 
 配置 `decision` 即启用：节点自动在发给智能体的 user 消息末尾注入**裁决协议**，要求智能体在输出最后一行单独输出 `AI_DECISION: PASS` 或 `AI_DECISION: REJECT`，引擎用正则提取标记路由——**不依赖智能体输出是合法 JSON**，围栏、说明文字都不影响：
 
-- `REJECT` → 拒绝策略：`terminate`（默认，终止实例）或 `backToInitiator`（退回发起人）
+- `REJECT` → 拒绝策略：`terminate`（默认，终止实例）或 `toStarter`（退回发起人）
 - `PASS` → 通过，流程继续下一节点
 - 标记缺失/无法识别 → **未裁决策略**（`unresolved`）：
   - `human`（默认）：给 `failureHandler` 建审批待办，同意→继续下一节点，拒绝→按拒绝策略；未配兜底人则放行并在记录标记「AI未裁决」
@@ -84,7 +86,7 @@ flowchart LR
 固定三条规则，无歧义：
 
 1. 完整输出**始终**写入 `msg._ai`（对象或原文）——审计原始记录永远在
-2. `flattenOutput: true`（**缺省值**）时输出 JSON 顶层字段平铺进 `msg.Data`（**同名覆盖表单字段**，冲突字段用映射改名规避）；`false` 则隔离，完整响应只留在 `msg._ai`。该配置与 `httpCall` 节点语义和默认值一致
+2. `flattenOutput` 缺省 `false`：隔离，完整输出只留在 `msg._ai`；写 `true` 时输出 JSON 顶层字段平铺进 `msg.Data`（**同名覆盖表单字段**，冲突字段用映射改名规避）。该配置与 `httpCall` 节点语义和默认值一致
 3. `outputMappings` 永远最后执行（显式配置优先级最高），如 `risk → aiRisk` 供后续条件分支用 `msg.aiRisk` 读取
 
 ### 附件识别（图片 / 文档）

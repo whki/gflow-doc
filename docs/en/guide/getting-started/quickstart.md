@@ -57,7 +57,7 @@ import (
 )
 
 // Minimal working DSL: manager approval → end.
-// The approver is configured via candidateType + candidateConfig (the actual fields
+// The approver is configured via approver + approveMode (the actual fields
 // the engine reads; mgr001 in userIds is the handler of the next todo).
 const leaveApprovalDSL = `{
   "ruleChain": {
@@ -68,7 +68,7 @@ const leaveApprovalDSL = `{
     "firstNodeIndex": 0,
     "nodes": [
       { "id": "node_manager_approval", "type": "userTask", "name": "Manager Approval",
-        "configuration": { "candidateType": "user", "candidateConfig": { "userIds": ["mgr001"] }, "approvalType": "single" } },
+        "configuration": { "approver": { "type": "user", "userIds": ["mgr001"] }, "approveMode": "single" } },
       { "id": "end", "type": "end", "name": "End" }
     ],
     "connections": [

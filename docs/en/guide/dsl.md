@@ -116,18 +116,22 @@ Available variables:
 { "url": "https://erp.example.com/api/orders/${msg.businessKey}", "body": "Order ${msg.businessKey} has been approved" }
 ```
 
-When the initiator picks the approvers, the `selected` field of the `userTask` candidate configuration also supports `${msg.xxx}` resolved from process variables.
+For initiator-selected approvers, `approver.expression` is itself a `${msg.xxx}` expression template (e.g. `${msg.selectedUsers}`); the approver list is resolved from process variables at runtime. Entries of the CC node's `ccUserIds` list support templates as well — an array result is flattened automatically.
 
-## Countersign Rules
+## Approval Mode and Vote Threshold
 
 ```json
 {
-  "approvalType": "countersign",
-  "approvalRule": "{\"type\":\"majority\",\"isSequential\":true}"
+  "approveMode": "vote",
+  "voteRule": { "type": "percent", "value": 60 }
 }
 ```
 
-For the full mapping of `approvalType` (single / or / countersign / sequential / vote, etc.) and `approvalRule` (`type: all / any / majority / percent / count` + `value` + `isSequential`), see [Chinese-Style Approval Semantics](/en/guide/features/approval-semantics).
+For the full mapping of `approveMode` (`single` / `any` OR-sign / `all` countersign / `sequential` / `vote`, defaulting to `single`) and the vote threshold `voteRule` (`type: majority / percent / count` + `value`, majority when unset, consumed only in `vote` mode), see [Chinese-Style Approval Semantics](/en/guide/features/approval-semantics).
+
+## Deploy-Time Validation
+
+At deploy/update time the engine validates every node's `configuration`: unknown values, missing required fields, and mutually exclusive combinations (a vote threshold on a non-vote node, `reject.strategy: toNode` without `target`, etc.) **reject the deployment outright** with a node-level error message — configuration errors are caught before writing, not at runtime.
 
 ## Complete Examples
 

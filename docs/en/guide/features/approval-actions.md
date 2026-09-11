@@ -46,7 +46,7 @@ When the previous step was approved in error, use "Return" to send the document 
 
 - Only the **last completed approval node** can be targeted — no picking arbitrary nodes, no returning straight to the initiator
 - The returned task is marked as returned, the target node gets a fresh todo, and form data and variables travel back with it
-- To send work back to the initiator, use "Reject" with the node's reject strategy set to `rejectStrategy: rejectToStarter`
+- To send work back to the initiator, use "Reject" with the node's reject configured as `reject.strategy: toStarter`
 
 ## Add-sign and Remove-sign
 

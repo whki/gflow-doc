@@ -27,7 +27,7 @@ aside: false
   </thead>
   <tbody>
     <tr><td colspan="3" class="price-section-title">审批内核（两版相同）</td></tr>
-    <tr><td>或签 / 会签（并行 · 顺序，全票 · 多数 · 比例 · 票数）</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
+    <tr><td>或签 / 会签 / 顺序审批 / 票签（过半 · 比例 · 票数）</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>加签 / 减签 / 转办 / 委托 / 签收抢单</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>退回上一节点 / 退回发起人 / 撤回 / 挂起恢复 / 超时催办 / 抄送</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>条件 / 并行 / 包容分支（switch · fork · join · inclusive）</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>

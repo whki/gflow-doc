@@ -14,30 +14,31 @@
 
 核心节点：流程走到这里时给审批人创建待办，审批通过才继续往下走。
 
-**谁来审批（七种方式）**：
+**谁来审批（`approver`，七种类型）**：
 
-| 方式 | 说明 |
+| type | 说明 |
 |---|---|
-| 指定成员 | 固定名单，发布前必须选好人 |
-| 指定角色 | 运行时按角色展开成员，产生"待认领"任务 |
-| 指定部门 | 运行时按部门展开成员，产生"待认领"任务 |
-| 直属主管 | 发起人的第 N 级主管（默认 1 级）；**组织层级不足时流程失败**，不会静默跳过 |
-| 多级主管 | 第 1 到 N 级主管逐级全审；可选"直到最上层"（有几级审几级） |
-| 发起人自选 | 发起人在发起页挑选审批人（必须至少选 1 人），支持多选 |
-| 发起人本人 | 审批人就是发起人自己 |
+| `user` 指定成员 | `userIds` 固定名单，发布前必须选好人 |
+| `role` 指定角色 | 运行时按 `roleIds` 展开成员，产生"待认领"任务 |
+| `dept` 指定部门 | 运行时按 `deptIds` 展开成员，产生"待认领"任务 |
+| `manager` 直属主管 | 发起人的第 `levels` 级主管（默认 1 级）；**组织层级不足时流程失败**，不会静默跳过 |
+| `multiLevelManager` 多级主管 | `levels > 0` 固定审批到第 N 级；`levels < 0` 逐级向上直到最上层（组织到顶自然停止） |
+| `initiatorSelect` 发起人自选 | `expression` 为表达式模板（如 `${msg.selectedUsers}`），发起时从流程变量解析审批人，必须至少解析出 1 人，支持多选 |
+| `initiatorSelf` 发起人本人 | 审批人就是发起人自己 |
 
-**多人怎么算过（审批方式）**：单人 / 或签（任一通过） / 依次（按顺序逐个审） / 会签（全员通过） / 票签（达阈值通过，默认按百分比且未填时按 50%）。详见[审批语义](/guide/features/approval-semantics)。
+**多人怎么算过（`approveMode`）**：`single` 单人（缺省）/ `any` 或签（任一通过）/ `all` 会签（全员通过，一票否决）/ `sequential` 顺序审批（按顺序逐个审）/ `vote` 票签（按 `voteRule` 阈值通过：`majority` 过半 / `percent` 百分比 / `count` 固定票数，未配时按过半）。详见[审批语义](/guide/features/approval-semantics)。
 
 **其他配置**：
 
-- 驳回策略：终止流程 / 回发起人 / 上一节点 / 指定节点
-- 自审策略：审批人恰好是发起人时——允许自审 / 自动跳过 / 转交主管 / 转交部门负责人
+- 超时（`timeout`）：`dueInMinutes` 截止时长 + `action` 逾期动作（`remind` 提醒 / `autoApprove` 自动通过 / `autoReject` 自动拒绝），相对每个任务创建时刻计时，由平台逾期巡检统一处理
+- 驳回（`reject`）：`strategy` 取 `terminate` 终止流程（缺省）/ `toStarter` 回发起人 / `toPrev` 上一节点 / `toNode` 指定节点（配 `target`）；跳转目标不可达时按节点 Reject/Failure 出边兜底，无出边则终止
+- 自审（`selfApproval`）：审批人恰好是发起人时——`none` 不过滤（缺省）/ `skip` 移除发起人 / `autoApprove` 保留发起人 / `delegateToManager` 转交直接上级 / `delegateToDeptManager` 转交部门负责人
 - 字段权限：控制该审批人对表单字段的 可编辑 / 只读 / 隐藏（提交时只读和隐藏字段不会被覆盖）
 - 动作权限：转办、委派、加签、退回、催办等按钮的显隐
 
 ### 抄送节点（ccTask）
 
-把流程知会给相关人员，**不阻塞流程**。两种名单方式：固定成员；或"发起人自选"——发起人在发起页自行挑选（可跳过不抄送）。
+把流程知会给相关人员，**不阻塞流程**。抄送名单 `ccUserIds` 支持两种写法：静态 userId 列表；或 `${msg.xxx}` 表单变量表达式模板项——发起时按流程变量求值，结果为字符串取单值、为数组则自动摊平逐个抄送（如 `"${msg.ccList}"`，由发起人在发起页决定抄给谁，名单为空时不抄送）。
 
 **表单权限**：控制抄送人查看详情时能看到的表单字段（只读 / 隐藏，默认全部只读）。抄送是知会性质，没有"编辑"语义。
 
@@ -54,8 +55,8 @@
 - 地址、请求头、请求体都支持 `${msg.字段}` 变量，输入框上方可点击插入表单字段
 - **请求失败（超时 / 非 2xx）会终止整个流程实例，无自动重试**——调不稳定的第三方接口请谨慎
 - 响应合并两个配置：
-  - **输出模式**：平铺到流程变量（默认，查接口补数据最常用；与表单同名的字段会覆盖申请人填写的内容）/ 隔离（完整响应只放在流程变量 `_http`，不碰表单）
-  - **字段映射**：把响应字段提取成指定流程变量，两种模式下都生效、优先级最高
+  - **输出模式（`flattenOutput`）**：隔离（缺省，完整响应只放在流程变量 `_http`，不碰表单）/ 平铺（写 `true`，响应顶层字段并入流程变量，**与表单同名的字段会覆盖申请人填写的内容**，查接口补数据时常用）
+  - **字段映射（`outputMappings`）**：把响应字段提取成指定流程变量，两种模式下都生效、优先级最高
 
 ### 服务任务（serviceTask）
 
@@ -87,7 +88,7 @@
 ```
 
 - `switch` 之后：`type` = 命中的分支名
-- 审批/服务节点之后：`Success` / `Failure`（拒绝时优先走 `rejectStrategy`，跳转失败才落到 `Failure` 出边）
+- 审批/服务节点之后：`Success` / `Failure`（拒绝时优先按节点 `reject` 驳回配置跳转，跳转失败才落到 `Failure` 出边）
 - 分支汇合处用 `join` 节点；每条 DSL 必须有可达的 `end` 节点（设计器与部署都会自动补全）
 
 ## 附录：userTask 引擎字段速查
@@ -100,11 +101,12 @@
   "type": "userTask",
   "name": "经理审批",
   "configuration": {
-    "candidateType": "user",
-    "candidateConfig": { "userIds": ["480356539643727872"] },
-    "approvalType": "single",
-    "selfApprovalType": "allow",
-    "rejectStrategy": "rejectToStarter"
+    "taskName": "经理审批",
+    "approver": { "type": "user", "userIds": ["480356539643727872"] },
+    "approveMode": "single",
+    "selfApproval": "none",
+    "reject": { "strategy": "toStarter" },
+    "timeout": { "dueInMinutes": 60, "action": "remind" }
   },
   "additionalInfo": {
     "actionPermissions": { "transfer": true, "return": true, "addSign": true, "urge": true },
@@ -113,10 +115,11 @@
 }
 ```
 
-- `candidateType`：`user` / `role` / `dept` / `direct_manager` / `multi_level_manager` / `initiator_select` / `initiator_self`
-- `candidateConfig`：按类型取 `userIds` / `roleIds` / `levels`（direct_manager 取第 N 级终点，multi_level_manager 逐级全审，负值表示到组织顶层）；`initiator_select` 场景 `selected` 支持 `${msg.xxx}` 从流程变量解析（gflow 写 `${msg.selectedUsers}`）
-- `approvalType`：`single` / `or` / `sequential` / `countersign` / `vote`，配合 `approvalRule` 阈值
-- `selfApprovalType`：`allow` / `skip` / `delegate_to_manager` / `delegate_to_department_manager`
-- `rejectStrategy`：`terminate` / `rejectToStarter` / `rejectToPrev` / `rejectToNode`（配合 `rejectTargetNode`）
+- `approver`：审批人，`type` 取 `user` / `role` / `dept` / `manager` / `multiLevelManager` / `initiatorSelect` / `initiatorSelf`，按类型消费 `userIds` / `roleIds` / `deptIds` / `levels`（`manager` 取第 N 级；`multiLevelManager` 正数固定到第 N 级、负数直到最上层）/ `expression`（`initiatorSelect` 填 `${msg.xxx}` 表达式模板，gflow 写 `${msg.selectedUsers}`）
+- `approveMode`：`single`（缺省）/ `any` / `all` / `sequential` / `vote`；`vote` 配 `voteRule`：`{ "type": "majority|percent|count", "value": N }`（percent 取 0~100，count 为票数，majority 不消费 value，缺省按过半）
+- `selfApproval`：`none`（缺省）/ `skip` / `autoApprove` / `delegateToManager` / `delegateToDeptManager`
+- `reject`：`{ "strategy": "terminate|toStarter|toPrev|toNode", "target": "nodeId" }`，`terminate` 缺省；`toNode` 必填 `target`（链中存在的节点 ID），目标不可达按 Reject/Failure 出边兜底
+- `timeout`：`{ "dueInMinutes": 60, "action": "remind|autoApprove|autoReject" }`，相对每个任务创建时刻计时，由宿主逾期巡检执行
+- 部署/更新时配置非法（未知取值、必填缺失、互斥组合）会被直接拒绝并给出节点级错误信息
 
 更多见[流程 DSL 规范](/guide/dsl)。

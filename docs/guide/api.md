@@ -34,7 +34,7 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/` | 分页查询（运行表与归档表自动合并返回） |
-| GET | `/{id}` | 实例详情 |
+| GET | `/{id}` | 实例详情（含审批时间线与后续审批节点预测 `upcoming`） |
 | POST | `/start` | **发起实例**（processKey + businessKey + variables；返回 `data.instanceId`） |
 | POST | `/{id}/submit-draft` | **提交草稿**（仅 draft 实例可提交；创建者/发起人范围由引擎强校验，权限 `workflow:instance:start` 或 `approval:create`） |
 | POST | `/{id}/suspend` · `/{id}/activate` | 挂起 / 恢复 |

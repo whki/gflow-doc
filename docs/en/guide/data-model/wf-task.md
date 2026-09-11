@@ -32,9 +32,9 @@ One "thing that needs a human to handle" = one row. OR-sign, countersign, add-si
 | Field | Description |
 |---|---|
 | `parent_id` | **Parent task ID** — add-sign creates child tasks attached under the main task; countersign gets one row per person |
-| `sequence_order` | Countersign sequence number (sequential countersign child tasks are ordered by this; 0 = main task or non-countersign) |
-| `approval_type` | `single` single person / `or` OR-sign / `sequential` sequential / `vote` vote / `countersign` countersign / `system` system / `cc` CC; add-sign child tasks inherit the parent task's `approval_type` |
-| `approval_rule` | Countersign rule JSON: `{"type":"all|any|majority|percent|count","value":threshold,"isSequential":bool}` |
+| `sequence_order` | Countersign sequence number (sequential-approval child tasks are ordered by this; 0 = main task or non-countersign) |
+| `approval_type` | `single` single person / `any` OR-sign / `all` countersign / `sequential` sequential / `vote` vote / `system` system / `cc` CC; add-sign child tasks inherit the parent task's `approval_type` |
+| `approval_rule` | Vote threshold JSON (vote tasks only): `{"type":"majority|percent|count","value":threshold}` |
 
 ### Handling and Timeout
 

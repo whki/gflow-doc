@@ -24,7 +24,7 @@ The Activiti family easily runs to twenty or thirty tables; GFlow Engine has onl
 Sequencing, parallelism, and conditional relationships between nodes are simply the rule chain's `connections` — at execution time the engine walks the graph in memory and needs no "current state-transition table". How far execution has progressed is expressed naturally by the active task rows: **wherever `wf_task` rows exist is exactly where the flow currently sits**.
 
 **2. Countersign and add-sign reuse the task parent-child chain.**
-Add-sign is not a new table; it attaches child tasks via `parent_id + sequence_order`. Countersign rules live in the `approval_rule` JSON on the task row — there is no separate "countersign configuration table".
+Add-sign is not a new table; it attaches child tasks via `parent_id + sequence_order`. Vote thresholds live in the `approval_rule` JSON on the task row — there is no separate "countersign configuration table".
 
 **3. Candidates are not expanded redundantly.**
 `wf_task_assignee` stores only the raw `entity_type + entity_id` references (role:xxx / dept:xxx); when querying todos, the `IdentityService` expands them in real time. When the organizational structure changes, todo ownership takes effect immediately — no task-table synchronization needed.

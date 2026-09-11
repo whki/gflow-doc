@@ -57,7 +57,7 @@ import (
 )
 
 // 最小可用 DSL：经理审批 → 结束。
-// 审批人配置用 candidateType + candidateConfig（引擎读取的真实字段，
+// 审批人配置用 approver + approveMode（引擎读取的真实字段，
 // userIds 里的 mgr001 即下一个待办的办理人）。
 const leaveApprovalDSL = `{
   "ruleChain": {
@@ -68,7 +68,7 @@ const leaveApprovalDSL = `{
     "firstNodeIndex": 0,
     "nodes": [
       { "id": "node_manager_approval", "type": "userTask", "name": "经理审批",
-        "configuration": { "candidateType": "user", "candidateConfig": { "userIds": ["mgr001"] }, "approvalType": "single" } },
+        "configuration": { "approver": { "type": "user", "userIds": ["mgr001"] }, "approveMode": "single" } },
       { "id": "end", "type": "end", "name": "结束" }
     ],
     "connections": [

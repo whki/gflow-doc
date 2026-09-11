@@ -8,18 +8,18 @@ Add-sign, reject, countersign, transfer, withdraw — these native semantics tha
 const matrixGroups = [
   {
     title: 'Approval modes',
-    items: ['Single approver', 'OR-sign (any one approves)', 'Parallel countersign', 'Sequential countersign', 'Sequential approval', 'Vote (ratio/count)', 'System task', 'CC'],
+    items: ['Single approver single', 'OR-sign any (any one approves)', 'Countersign all (one-vote veto)', 'Sequential approval sequential', 'Vote vote (ratio/count)', 'System task', 'CC'],
   },
   {
-    title: 'Countersign aggregation rules',
-    items: ['Unanimous all (one-vote veto)', 'Any one any', 'Majority majority', 'Percentage percent', 'Fixed votes count', 'Sequential/parallel configurable'],
+    title: 'Vote thresholds',
+    items: ['Majority majority (default)', 'Percentage percent', 'Fixed votes count'],
   },
   {
     title: 'In-flight actions',
     items: ['Add-sign', 'Remove-sign', 'Transfer', 'Delegate', 'Claim / grab', 'Return to previous node', 'Withdraw', 'Comment', 'Attachments'],
   },
   {
-    title: 'Candidate types',
+    title: 'Approver types',
     items: ['Specific members', 'Role', 'Department', 'Direct manager', 'Multi-level manager', 'Initiator-selected', 'The initiator themselves'],
   },
   {
@@ -28,87 +28,106 @@ const matrixGroups = [
   },
   {
     title: 'Self-approval policy (approver = initiator)',
-    items: ['Skip', 'Route to direct manager', 'Route to department manager', 'Allow self-approval'],
+    items: ['No filtering none (default)', 'Remove initiator skip', 'Keep initiator autoApprove', 'Route to direct manager', 'Route to department manager'],
   },
 ]
 </script>
 
 <CheckMatrix :groups="matrixGroups" />
 
-## Approval Modes (approvalType)
+## Approval Modes (approveMode)
 
-Values for the node's `configuration.approvalType` (persisted as the same value into `wf_task.approval_type`):
+Values for the node's `configuration.approveMode` (persisted as the same value into `wf_task.approval_type`); the enums are case-sensitive exact values:
 
-| approvalType | Name | Pass rule | Description |
-|---|---|---|---|
-| `single` | Single approver | The assignee's action produces the outcome | Default value; `assignee` is a single handler |
-| `or` | OR-sign | **Passes as soon as any one approver approves**; a single rejection rejects it | All candidates receive the task simultaneously; first to act wins |
-| `countersign` | Countersign | Aggregated per `approvalRule` (unanimous / majority / ratio / count) | Works together with the rule fields; see the table below |
-| `sequential` | Sequential approval | The next person receives the task only after the previous one has finished | The engine creates single-person tasks one at a time on demand; until the previous person produces an outcome, the task is invisible to the next |
-| `vote` | Vote | The outcome follows the ratio/count in `approvalRule` | Shares the rule structure with countersign; a good fit for review and voting scenarios |
-| `system` | System task | No manual voting | Used internally by automatic nodes |
-| `cc` | CC task | Produces no approval outcome | Exclusive to `ccTask` nodes |
+| approveMode | Pass rule | Description |
+|---|---|---|
+| `single` | The assignee's action produces the outcome | Default value; `assignee` is a single handler |
+| `any` | **Passes as soon as any one approver approves**; a single rejection rejects it | All candidates receive the task simultaneously; first to act wins |
+| `all` | Everyone must approve; one-vote veto | Everyone approves in parallel and every vote counts |
+| `sequential` | The next person receives the task only after the previous one has finished | The engine creates single-person tasks one at a time on demand; until the previous person produces an outcome, the task is invisible to the next |
+| `vote` | The outcome follows the `voteRule` threshold | Everyone votes in parallel; a good fit for review and voting scenarios, see the table below |
 
-## Countersign Rules (approvalRule)
+`system` / `cc` are approval types used internally by the engine (system auto tasks and CC tasks); `userTask` nodes do not accept these two values.
 
-The aggregation rule for countersign/vote is written to `approval_rule` (a JSON string), with `CountersignRule` as the struct:
+How the multi-person modes differ at runtime:
+
+**OR-sign any** — everyone sees the task at once, first to act wins:
+
+```mermaid
+flowchart LR
+    s[Task dispatched] --> m[A / B / C all see it] --> r["Any one action produces the outcome"]
+```
+
+**Countersign all / vote vote** — everyone acts in parallel, then ballots aggregate:
+
+```mermaid
+flowchart LR
+    s[Task dispatched] --> m[Everyone acts in parallel] --> r["Countersign passes only unanimously (one-vote veto)<br/>vote aggregates per voteRule"]
+```
+
+**Sequential sequential** — serial, person by person; until the previous person produces an outcome the next one sees nothing:
+
+```mermaid
+flowchart LR
+    s[Task dispatched] --> a[A acts] --> b[B acts] --> c[C acts] --> r[The last person produces the outcome]
+```
+
+## Vote Thresholds (voteRule)
+
+With `approveMode: vote`, the pass threshold is written to `configuration.voteRule` and persisted into `wf_task.approval_rule` (JSON):
 
 | Field | Type | Description |
 |---|---|---|
-| `type` | string | Aggregation mode: `all` / `any` / `majority` / `percent` / `count` |
-| `value` | float | The rule value, used by the `percent` and `count` types |
-| `isSequential` | bool | `false` parallel countersign (default) / `true` sequential countersign |
+| `type` | string | Threshold type: `majority` / `percent` / `count` |
+| `value` | float | The rule value: `percent` takes 0–100; `count` is a fixed number of votes; `majority` ignores it |
 
-Details of the `type` aggregation modes:
+Details of the `type` thresholds (when `voteRule` is unset, `majority` applies):
 
-| type | Pass condition | Reject condition | Example |
-|---|---|---|---|
-| `all` | Everyone approves | A single rejection rejects it | `{"type":"all","isSequential":false}` |
-| `any` | Any one person approves | Any rejection rejects it (the first ballot completed decides the outcome) | `{"type":"any"}` |
-| `majority` | Majority approves (`total/2+1`) | Majority rejects | `{"type":"majority","isSequential":true}` |
-| `percent` | Approval share of votes ≥ `value` (in percent, rounded up: 60% of 3 people requires 2 votes) | Rejected once reaching the threshold is mathematically impossible | `{"type":"percent","value":60}` |
-| `count` | Number of approval votes ≥ `value` (fixed count) | Rejected once reaching the threshold is mathematically impossible | `{"type":"count","value":3}` |
+| type | Pass condition | Reject condition |
+|---|---|---|
+| `majority` | Majority approves (`total/2+1`) | Majority rejects |
+| `percent` | Approval share of votes ≥ `value` (in percent, rounded up: 60% of 3 people requires 2 votes) | Rejected once reaching the threshold is mathematically impossible |
+| `count` | Number of approval votes ≥ `value` | Rejected once reaching the threshold is mathematically impossible |
 
 Typical combinations:
 
 ```json
-// Parallel countersign · unanimous pass (one-vote veto)
-{ "type": "all", "isSequential": false }
+// vote · majority pass (the default; voteRule can be omitted)
+{ "type": "majority" }
 
-// Sequential countersign · majority pass (reviewed one by one; outcome once more than half)
-{ "type": "majority", "isSequential": true }
-
-// Parallel vote · 60% approval (review voting)
+// vote · 60% approval (review voting)
 { "type": "percent", "value": 60 }
+
+// vote · at least 3 approval votes
+{ "type": "count", "value": 3 }
 ```
 
-> With `isSequential: true`, participants are activated one by one according to `wf_task.sequence_order`; in parallel mode everyone sees the task at the same time and the first to claim handles it (see Claim / grab below).
+> `vote` is a parallel ballot where the first to claim acts first (see Claim / grab below); for one-by-one handling use `approveMode: sequential`.
 
 ## When the Approvers Include the Initiator (Self-Approval Policy)
 
-When the initiator appears in the approval chain, the node's configured `selfApprovalType` decides what happens — "approving your own request" never occurs:
+When the initiator appears in the approval chain, the node's configured `selfApproval` decides what happens:
 
-| selfApprovalType | Behavior |
+| selfApproval | Behavior |
 |---|---|
-| `skip` | Skip this approver and go straight to the next node |
-| `delegate_to_manager` | Route to the direct manager (falls back to the department manager when absent, and finally to the person specified by a `candidateConfig` variable) |
-| `delegate_to_department_manager` | Route to the department manager for approval |
-| `allow` | Allow the initiator to self-approve (the default; use when compliance requires it) |
+| `none` | Default, no filtering; the initiator stays in the approver list as usual |
+| `skip` | Remove the initiator and go straight to the next node (an `initiatorSelf` approver paired with `skip` leaves nobody to review and is rejected by deploy-time validation) |
+| `autoApprove` | Keep the initiator (a reserved auto-approve semantic; the current implementation does not filter) |
+| `delegateToManager` | The initiator's task is handed to their direct manager |
+| `delegateToDeptManager` | The initiator's task is handed to the department head |
 
-> The enum also contains `auto_approve` (auto-approve) as a reserved value; the current implementation treats it the same as `allow`.
+## Approver Resolution
 
-## Candidate Resolution
+Tasks are created from the node's `configuration.approver` `type`. The candidate pool (`wf_task_assignee`) stores only the original references, which are expanded through `IdentityService` at query time:
 
-Tasks are created with the following `candidateType` values. The candidate pool (`wf_task_assignee`) stores only the original references, which are expanded through `IdentityService` at query time:
-
-| candidateType | Resolution |
+| approver.type | Resolution |
 |---|---|
-| `user` | `candidateUsers` provides user IDs directly |
-| `role` / `dept` | Looks up users by role/department (department-manager approval can be configured) |
-| `direct_manager` | The initiator's direct manager |
-| `multi_level_manager` | The initiator's managers across multiple levels |
-| `initiator_select` | Approvers chosen by the initiator at submission |
-| `initiator_self` | The initiator themselves (self-approval scenario) |
+| `user` | `userIds` provides user IDs directly |
+| `role` / `dept` | Looks up users by role/department, producing to-be-claimed tasks |
+| `manager` | The initiator's Nth-level manager via `levels` (level 1 by default) |
+| `multiLevelManager` | The initiator's managers across multiple levels: `levels > 0` pins approval at level N, `levels < 0` walks up to the top |
+| `initiatorSelect` | Chosen by the initiator at submission: the `expression` template (e.g. `${msg.selectedUsers}`) resolves the approvers from process variables |
+| `initiatorSelf` | The initiator themselves (self-approval scenario) |
 
 ## Actions During Processing
 
@@ -116,7 +135,7 @@ Tasks are created with the following `candidateType` values. The candidate pool 
 
 Dynamically insert approvers mid-approval (add-sign) or remove add-sign / countersign members who have not yet acted (remove-sign). Add-sign uses **before add-sign** semantics: the newly added signers review first, and the original approver produces an outcome only after all add-sign subtasks are complete. The engine maintains the parent-child task chain via `wf_task.parent_id + sequence_order`; add-sign creates child tasks, and the main task waits until every task on the chain has finished.
 
-Remove-sign only touches subtasks that have **not yet been acted on** — members who already produced an outcome cannot be removed. On countersign / vote nodes the `approvalRule` is re-evaluated after removal: once the remaining votes already meet the threshold the node resolves and the flow continues; removing everyone (nobody left to review) terminates the instance. Removals are recorded via the `ReduceSign` event for audit / notification.
+Remove-sign only touches subtasks that have **not yet been acted on** — members who already produced an outcome cannot be removed. On countersign / vote nodes the remaining ballots are re-evaluated after removal: once they already meet the threshold the node resolves and the flow continues; removing everyone (nobody left to review) terminates the instance. Removals are recorded via the `ReduceSign` event for audit / notification.
 
 ### Return (Send Back)
 
@@ -124,7 +143,7 @@ A task can be returned to the **last completed approval node** for re-processing
 
 - The return target is fixed to the most recently completed `userTask` (you cannot pick a target across nodes, nor return directly to the initiator)
 - The returned task is archived as `returned`, the target node's task is rebuilt, and the form data and variables are carried back along with it
-- When you need to "return to the initiator", configure the node's reject strategy as `rejectStrategy: rejectToStarter`
+- When you need to "return to the initiator", configure the node's reject as `reject.strategy: toStarter`
 
 ### Transfer / Delegate
 
@@ -149,15 +168,34 @@ The initiator can **withdraw** an in-flight application: the instance terminates
 | Terminate | `terminated` | Force-killed by an administrator; `end_reason` is recorded |
 | Complete | `completed` | Finishes normally through the end node and is archived into the history tables |
 
-## Timeout Policy
+**Upcoming node forecast (`upcoming`)**: the detail response of a live instance carries an `upcoming` field — walking forward from the active nodes along Success edges, it forecasts the upcoming approval nodes (`nodeId` / `nodeName` / `approverType` / `assignees` / `unresolved`). The forecast is not a promise: transfers and add-signs can change the actual path; it truncates at conditional branches, and initiator-selected nodes report `unresolved: initiatorSelect` until the variables settle.
 
-A node's `timeoutPolicy` (`dueInMinutes` deadline duration + `action`) determines how overdue tasks are handled. gflow periodically scans in-flight tasks whose `wf_task.due_date` has expired every 30 minutes:
+## Timeout (timeout)
+
+The node's `configuration.timeout` (`dueInMinutes` deadline duration + `action`) determines how overdue tasks are handled. The duration is measured **from the moment each task is created** and executed by the host's overdue sweep (the gflow platform scans in-flight tasks whose `wf_task.due_date` has expired every 30 minutes):
 
 - `remind` (default): sends an in-app reminder through the built-in notification center without changing the task state
 - `autoApprove`: auto-approves the overdue task as the system and the process continues
-- `autoReject`: auto-rejects as the system and routes according to the node's reject strategy
+- `autoReject`: auto-rejects as the system and routes according to the node's reject configuration
 
-`due_date` can also be set manually via the `TaskService.SetDueDate` Go API. For multi-instance nodes (sequential countersign / sequential approval), each subsequent subtask re-evaluates `dueInMinutes` based on **its own creation time**, so the whole chain never shares a single static deadline. When embedding the engine directly (without the gflow platform), the host must implement the scan logic itself (refer to gflow's overdue scanner).
+`due_date` can also be set manually via the `TaskService.SetDueDate` Go API. For multi-instance nodes (sequential approval), each subsequent subtask re-evaluates `dueInMinutes` based on **its own creation time**, so the whole chain never shares a single static deadline. When embedding the engine directly (without the gflow platform), the host must implement the scan logic itself (refer to gflow's overdue scanner).
+
+## Reject (reject)
+
+The node's `configuration.reject` decides where the flow goes when an approval is rejected:
+
+```json
+{ "strategy": "toNode", "target": "node_supplement" }
+```
+
+| strategy | Behavior |
+|---|---|
+| `terminate` | Terminates the instance (default) |
+| `toStarter` | Jumps back to the start node (returns to the initiator to revise and resubmit) |
+| `toPrev` | Jumps to the previous `userTask` node for rework |
+| `toNode` | Jumps to the node named by `target` (required; must be a node ID that exists on the chain) |
+
+If the jump target is unreachable (conditions unmet, edge missing, etc.), it falls back to the node's Reject / Failure outgoing edges; with no outgoing edges either, the instance terminates. In multi-person modes, any single rejection triggers the reject (OR-sign first-to-act wins; countersign is a one-vote veto).
 
 ## CC
 
@@ -180,3 +218,7 @@ Each `userTask` can finely toggle the actions available to its approver via `add
 ```
 
 On the initiator side there are additional instance-level switches such as `suspend` / `withdraw` / `terminate` / `resubmit`. All of these are configured visually, node by node, in the Process Designer.
+
+## Deploy-Time Validation
+
+At deploy/update time the engine validates every node's `configuration`: unknown values, missing required fields, and mutually exclusive combinations (a vote threshold on a non-vote node, `toNode` without `target`, etc.) **reject the deployment outright** with a node-level error message — configuration errors are caught before writing, not at runtime.

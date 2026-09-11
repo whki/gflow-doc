@@ -27,7 +27,7 @@ aside: false
   </thead>
   <tbody>
     <tr><td colspan="3" class="price-section-title">Approval core (identical in both editions)</td></tr>
-    <tr><td>OR-sign / countersign (parallel · sequential, unanimous · majority · percentage · vote count)</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
+    <tr><td>OR-sign / countersign / sequential approval / vote (majority · percentage · vote count)</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>Add-sign / remove-sign / transfer / delegate / claim & grab</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>Return to previous node / return to initiator / withdraw / suspend & resume / timeout reminders / CC</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>
     <tr><td>Conditional / parallel / inclusive branches (switch · fork · join · inclusive)</td><td class="pt-yes">✓</td><td class="pt-yes">✓</td></tr>

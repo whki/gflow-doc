@@ -34,7 +34,7 @@ Approval action endpoints (claim / approve / reject / transfer / delegate / add-
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | Paginated query (runtime and archive tables are automatically merged in the response) |
-| GET | `/{id}` | Instance details |
+| GET | `/{id}` | Instance details (approval timeline plus the `upcoming` forecast of future approval nodes) |
 | POST | `/start` | **Start an instance** (processKey + businessKey + variables; returns `data.instanceId`) |
 | POST | `/{id}/submit-draft` | **Submit a draft** (only draft instances can be submitted; the creator/initiator scope is strictly enforced by the engine; permission `workflow:instance:start` or `approval:create`) |
 | POST | `/{id}/suspend` · `/{id}/activate` | Suspend / resume |

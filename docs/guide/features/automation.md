@@ -96,7 +96,7 @@ components.Services.Register(components.ServiceFuncDef{
 ```
 发起(入职) → HR 审批 → delay(90 天) → 直属主管(转正评估)
                          ├─ 通过 → httpCall(开通 IT 账号) → automation(同步花名册 + 通知) → 结束
-                         └─ 驳回(rejectToStarter) → 发起人修改后重新提交
+                         └─ 驳回(toStarter) → 发起人修改后重新提交
 ```
 
 ## 事件回调

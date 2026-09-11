@@ -40,7 +40,7 @@ The `aiAgent` node invokes an AI agent rule chain (built on [rulego-components-a
     "timeoutSec": 120,
     "inputAssembly": {
       "customPrompt": "Focus on checking whether the amount ${msg.amount} exceeds the entertainment expense limit",
-      "contextSources": { "formData": true, "prevComments": true, "processInfo": true }
+      "contextSources": { "formData": true, "prevComments": true, "initiator": true }
     },
     "decision": { "rejectStrategy": "terminate", "unresolved": "human" },
     "failureHandler": ["u_finance_admin"],
@@ -50,11 +50,13 @@ The `aiAgent` node invokes an AI agent rule chain (built on [rulego-components-a
 }
 ```
 
+In `contextSources`, `formData` / `processInfo` / `prevComments` / `initiator` are enabled by default (optional booleans; set `false` to drop a source); `attachments` is off by default (boolean), and `attachmentsImages` / `attachmentsDocs` still follow the attachments master switch.
+
 ### Verdict Routing (decision)
 
 Configuring `decision` enables it: the node automatically appends a **verdict protocol** to the end of the user message sent to the agent, requiring the agent to output `AI_DECISION: PASS` or `AI_DECISION: REJECT` alone on the last line of its output; the engine extracts the marker with a regex and routes on it — **it does not depend on the agent's output being valid JSON**, so code fences or explanatory text cause no problems:
 
-- `REJECT` → reject strategy: `terminate` (default, terminates the instance) or `backToInitiator` (sends it back to the initiator)
+- `REJECT` → reject strategy: `terminate` (default, terminates the instance) or `toStarter` (sends it back to the initiator)
 - `PASS` → approved; the process continues to the next node
 - Marker missing/unrecognizable → **unresolved strategy** (`unresolved`):
   - `human` (default): creates an approval todo for the `failureHandler` list; approve → continue to the next node, reject → apply the reject strategy. If no fallback person is configured, the process passes through and the record is tagged "AI unresolved"
@@ -72,7 +74,7 @@ Call failures (timeout/API errors) and unresolved cases routed to humans share t
 Three fixed rules, no ambiguity:
 
 1. The complete output is **always** written to `msg._ai` (object or raw text) — the original record for auditing is always there
-2. With `flattenOutput: true` (the **default**), top-level fields of the output JSON are flattened into `msg.Data` (**overwriting same-named form fields**; use a mapping rename to avoid collisions); with `false`, the output is isolated and the complete response stays only in `msg._ai`. This matches the `httpCall` node in both semantics and default value
+2. `flattenOutput` defaults to `false`: isolated, with the complete output staying only in `msg._ai`; when set to `true`, top-level fields of the output JSON are flattened into `msg.Data` (**overwriting same-named form fields**; use a mapping rename to avoid collisions). This matches the `httpCall` node in both semantics and default value
 3. `outputMappings` always runs last (explicit configuration has the highest priority), e.g. `risk → aiRisk` so a later conditional branch can read `msg.aiRisk`
 
 ## The Experience in gflow

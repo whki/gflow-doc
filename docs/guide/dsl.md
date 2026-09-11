@@ -116,18 +116,22 @@ gflow 设计器的「条件分支」产出原生 `switch` 节点，`cases` 用 R
 { "url": "https://erp.example.com/api/orders/${msg.businessKey}", "body": "单号${msg.businessKey}已通过审批" }
 ```
 
-发起人自选审批人场景下，`userTask` 候选配置的 `selected` 也支持 `${msg.xxx}` 从流程变量解析。
+发起人自选审批人场景下，`approver.expression` 本身就是 `${msg.xxx}` 表达式模板（如 `${msg.selectedUsers}`），运行时从流程变量解析审批人名单；抄送节点的 `ccUserIds` 列表项同样支持模板写法，求值结果为数组时自动摊平。
 
-## 会签规则
+## 审批方式与票签阈值
 
 ```json
 {
-  "approvalType": "countersign",
-  "approvalRule": "{\"type\":\"majority\",\"isSequential\":true}"
+  "approveMode": "vote",
+  "voteRule": { "type": "percent", "value": 60 }
 }
 ```
 
-`approvalType`（single / or / countersign / sequential / vote 等）与 `approvalRule`（`type: all / any / majority / percent / count` + `value` + `isSequential`）的完整对照表见[中国式审批语义](/guide/features/approval-semantics)。
+`approveMode`（`single` 单人 / `any` 或签 / `all` 会签 / `sequential` 顺序审批 / `vote` 票签，缺省 `single`）与票签阈值 `voteRule`（`type: majority / percent / count` + `value`，缺省按过半，仅 `vote` 模式消费）的完整对照表见[中国式审批语义](/guide/features/approval-semantics)。
+
+## 部署期校验
+
+部署 / 更新流程时，引擎对各节点 `configuration` 做校验：未知取值、必填缺失、互斥组合（如票签阈值配在非票签节点、`reject.strategy: toNode` 缺 `target`）会**直接拒绝部署**，并给出节点级错误信息——配置错误拦在写入前而不是运行期。
 
 ## 完整示例
 

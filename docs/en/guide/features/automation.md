@@ -97,7 +97,7 @@ A time-driven composition (probation confirmation):
 ```
 Initiate (onboarding) → HR approval → delay(90 days) → Direct supervisor (probation review)
                          ├─ approved → httpCall(provision IT account) → automation(sync roster + notify) → End
-                         └─ rejected (rejectToStarter) → initiator revises and resubmits
+                         └─ rejected (toStarter) → initiator revises and resubmits
 ```
 
 ## Event Callbacks

@@ -32,9 +32,9 @@
 | 字段 | 说明 |
 |---|---|
 | `parent_id` | **父任务 ID**——加签产生子任务挂到主任务下；会签每人一行 |
-| `sequence_order` | 会签序号（顺序会签子任务按此排序；0 = 主任务或非会签） |
-| `approval_type` | `single` 单人 / `or` 或签 / `sequential` 依次 / `vote` 票签 / `countersign` 会签 / `system` 系统 / `cc` 抄送；加签子任务继承父任务的 `approval_type` |
-| `approval_rule` | 会签规则 JSON：`{"type":"all|any|majority|percent|count","value":阈值,"isSequential":bool}` |
+| `sequence_order` | 会签序号（顺序审批子任务按此排序；0 = 主任务或非会签） |
+| `approval_type` | `single` 单人 / `any` 或签 / `all` 会签 / `sequential` 顺序审批 / `vote` 票签 / `system` 系统 / `cc` 抄送；加签子任务继承父任务的 `approval_type` |
+| `approval_rule` | 票签阈值 JSON（仅票签任务）：`{"type":"majority|percent|count","value":阈值}` |
 
 ### 办理与超时
 

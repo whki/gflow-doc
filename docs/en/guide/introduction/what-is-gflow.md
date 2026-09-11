@@ -26,7 +26,7 @@ GFlow Engine and GFlow Platform share the same DSL and data model; the only diff
 ## Core Features
 
 - **Rule chain as process**: The process DSL reuses RuleGo rule chains, and native nodes such as the `switch` conditional gateway and `fork`/`inclusive`/`join` parallel branches can be orchestrated directly. A process is a rule chain; a rule chain is a process.
-- **Complete Chinese-style approval semantics**: OR-sign (or), countersign (parallel/sequential, all-votes/majority/ratio/vote-count), dynamic add-sign/remove-sign, transfer, delegate, claim/grab, return to the previous node, withdraw, suspend/resume, and overdue reminders.
+- **Complete Chinese-style approval semantics**: OR-sign (any), countersign (all, one-vote veto), sequential approval, vote (majority/ratio/vote-count), dynamic add-sign/remove-sign, transfer, delegate, claim/grab, return to the previous node, withdraw, suspend/resume, and overdue reminders.
 - **7 core tables**: Runtime and history are kept on separate tracks; the [data model](/en/guide/data-model/) is clear at a glance.
 - **Multi-tenant**: `tenant_id` isolation across the entire chain, with rule chain execution pools partitioned by tenant.
 - **Pluggable identity system**: Implement `IdentityService` to connect your real users/roles/departments (approvers resolved by role, department, or multi-level manager).

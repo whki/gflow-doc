@@ -39,10 +39,10 @@ Taking the approval node as an example:
 | Option | Description |
 |---|---|
 | Approver | Specific members / roles / direct supervisor / multi-level supervisor / initiator's choice / initiator (department candidate pools are supported by the engine DSL but not yet exposed in the designer) |
-| Approval method | Sequential / countersign (parallel, unanimous) / OR-sign / vote-sign (majority / percentage / count); advanced countersign combinations such as ordered or majority can be hand-written as `approvalRule` JSON |
+| Approval method | Single / OR-sign / countersign (unanimous) / sequential / vote (majority · percentage · count); the vote threshold defaults to majority and can be fine-tuned by hand-writing `voteRule` JSON |
 | Form permissions | Per-field hidden / read-only / editable (written into the DSL `formPermissions`) |
 | Action permissions | Approve/reject are always available; every other action (transfer / return / delegate / add-remove sign / expedite / attachments) has its own toggle, off by default |
-| Timeout policy | Deadline duration + overdue action (remind / auto-approve / auto-reject); overdue tasks are handled uniformly by gflow's scheduled sweeps |
+| Timeout | Deadline duration + overdue action (remind / auto-approve / auto-reject), measured from the moment each task is created and handled uniformly by gflow's scheduled sweeps |
 
 ## Field Permissions
 

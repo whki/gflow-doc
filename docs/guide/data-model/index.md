@@ -70,7 +70,7 @@ erDiagram
 节点间的先后、并行、条件关系就是规则链的 `connections`——引擎执行时在内存里走图，不需要「当前状态转移表」。执行到哪一步由活动任务行天然表达：**哪些 wf_task 行存在，流程就停在哪**。
 
 **2. 会签/加签复用任务父子链。**
-加签不是新表，是 `parent_id + sequence_order` 挂子任务；会签规则就存在任务行的 `approval_rule` JSON 里，没有独立的「会签配置表」。
+加签不是新表，是 `parent_id + sequence_order` 挂子任务；票签阈值就存在任务行的 `approval_rule` JSON 里，没有独立的「会签配置表」。
 
 **3. 候选人不冗余展开。**
 `wf_task_assignee` 只存 `entity_type + entity_id` 原始引用（role:xxx / dept:xxx），查询待办时经 `IdentityService` 实时展开。组织架构改了，待办归属立即生效，不需要同步任务表。

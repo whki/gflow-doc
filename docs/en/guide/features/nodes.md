@@ -14,30 +14,31 @@ The marker for where a process begins, generated automatically by the Process De
 
 The core node: when the process reaches it, a todo is created for the approvers, and only approval lets the process continue.
 
-**Who approves (seven ways)**:
+**Who approves (`approver`, seven types)**:
 
-| Mode | Description |
+| Type | Description |
 |---|---|
-| Specific members | A fixed list; the people must be chosen before publishing |
-| Specific role | Members are expanded from the role at runtime, producing "to be claimed" tasks |
-| Specific department | Members are expanded from the department at runtime, producing "to be claimed" tasks |
-| Direct manager | The initiator's Nth-level manager (level 1 by default); **the process fails if the org hierarchy is not deep enough** — it is never silently skipped |
-| Multi-level manager | Managers from level 1 through N all approve, level by level; an "up to the top" option is available (review as many levels as exist) |
-| Initiator-selected | The initiator picks the approvers on the initiation page (at least 1 person must be selected); multiple selection is supported |
-| The initiator themselves | The approver is the initiator |
+| `user` — specific members | A fixed list in `userIds`; the people must be chosen before publishing |
+| `role` — specific role | Members are expanded from `roleIds` at runtime, producing "to be claimed" tasks |
+| `dept` — specific department | Members are expanded from `deptIds` at runtime, producing "to be claimed" tasks |
+| `manager` — direct manager | The initiator's Nth-level manager via `levels` (level 1 by default); **the process fails if the org hierarchy is not deep enough** — it is never silently skipped |
+| `multiLevelManager` — multi-level manager | `levels > 0` pins approval at level N; `levels < 0` walks up level by level until the top of the organization (stopping naturally when it runs out) |
+| `initiatorSelect` — initiator-selected | `expression` is an expression template (e.g. `${msg.selectedUsers}`); approvers are resolved from process variables at submission, and at least 1 person must resolve; multiple selection is supported |
+| `initiatorSelf` — the initiator themselves | The approver is the initiator |
 
-**How multiple approvers count as passed (approval mode)**: single / OR-sign (any one approves) / sequential (reviewed one by one in order) / countersign (everyone approves) / vote (passes at the threshold, percent-based by default and 50% when left blank). See [Approval Semantics](/en/guide/features/approval-semantics) for details.
+**How multiple approvers count as passed (`approveMode`)**: `single` (default) / `any` OR-sign (any one approves) / `all` countersign (everyone approves, one-vote veto) / `sequential` (reviewed one by one in order) / `vote` (passes at the `voteRule` threshold: `majority` / `percent` / `count`; majority when unset). See [Approval Semantics](/en/guide/features/approval-semantics) for details.
 
 **Other configuration**:
 
-- Reject strategy: terminate the process / return to the initiator / previous node / a specified node
-- Self-approval policy, for when the approver happens to be the initiator: allow self-approval / auto-skip / hand over to the manager / hand over to the department head
+- Timeout (`timeout`): `dueInMinutes` deadline duration + `action` overdue action (`remind` / `autoApprove` / `autoReject`), measured from the moment each task is created and handled uniformly by the platform's overdue sweep
+- Reject (`reject`): `strategy` is `terminate` (default) / `toStarter` back to the initiator / `toPrev` previous node / `toNode` a specified node (with `target`); if the jump target is unreachable it falls back to the node's Reject/Failure outgoing edges, and terminates when there is none
+- Self-approval (`selfApproval`), for when the approver happens to be the initiator: `none` no filtering (default) / `skip` remove the initiator / `autoApprove` keep the initiator / `delegateToManager` hand over to the direct manager / `delegateToDeptManager` hand over to the department head
 - Field permissions: control whether each form field is editable / read-only / hidden for this approver (read-only and hidden fields are never overwritten on submission)
 - Action permissions: show or hide buttons such as transfer, add-sign, return, and urge
 
 ### CC Node (ccTask)
 
-Notifies relevant people about the process, **without blocking it**. Two ways to build the list: fixed members; or "initiator-selected" — the initiator picks recipients on the initiation page (skipping CC entirely is allowed).
+Notifies relevant people about the process, **without blocking it**. The CC list `ccUserIds` supports two kinds of entries: static user IDs, or `${msg.xxx}` form-variable expression templates — evaluated against process variables at submission; a string result is taken as a single recipient and an array result is flattened item by item (e.g. `"${msg.ccList}"`, letting the initiator decide whom to CC on the initiation page; an empty list simply skips CC).
 
 **Form permissions**: control which form fields CC recipients can see when viewing the details (read-only / hidden; all fields read-only by default). CC is informational in nature — there is no "edit" semantics.
 
@@ -54,8 +55,8 @@ Synchronously calls an external API within the process (tracking a shipment, fet
 - The URL, headers, and body all support `${msg.field}` variables; form fields can be inserted with a click above the input box
 - **A failed request (timeout / non-2xx) terminates the entire process instance, with no automatic retry** — be cautious when calling unreliable third-party APIs
 - Response merging involves two settings:
-  - **Output mode**: flatten into process variables (the default, and the most common way to enrich data from an API; fields with the same name as form fields overwrite what the applicant filled in) / isolated (the complete response goes only into the process variable `_http` and never touches the form)
-  - **Field mapping**: extracts response fields into designated process variables; effective in both modes and takes the highest precedence
+  - **Output mode (`flattenOutput`)**: isolated (default; the complete response goes only into the process variable `_http` and never touches the form) / flattened (set to `true`; top-level response fields merge into process variables, and **fields with the same name as form fields overwrite what the applicant filled in** — the common choice for data enrichment)
+  - **Field mapping (`outputMappings`)**: extracts response fields into designated process variables; effective in both modes and takes the highest precedence
 
 ### Service Task (serviceTask)
 
@@ -87,7 +88,7 @@ The process suspends here for the specified duration and then automatically cont
 ```
 
 - After a `switch`: `type` = the name of the branch that hit
-- After approval/service nodes: `Success` / `Failure` (on rejection, `rejectStrategy` takes priority; only a failed jump falls through to the `Failure` outgoing edge)
+- After approval/service nodes: `Success` / `Failure` (on rejection, the node's `reject` configuration takes priority; only a failed jump falls through to the `Failure` outgoing edge)
 - Use a `join` node where branches converge; every DSL must have a reachable `end` node (both the designer and deployment auto-complete it)
 
 ## Appendix: userTask Engine Field Quick Reference
@@ -100,11 +101,12 @@ For developers who write DSL directly; when the designer saves, it also writes f
   "type": "userTask",
   "name": "Manager approval",
   "configuration": {
-    "candidateType": "user",
-    "candidateConfig": { "userIds": ["480356539643727872"] },
-    "approvalType": "single",
-    "selfApprovalType": "allow",
-    "rejectStrategy": "rejectToStarter"
+    "taskName": "Manager approval",
+    "approver": { "type": "user", "userIds": ["480356539643727872"] },
+    "approveMode": "single",
+    "selfApproval": "none",
+    "reject": { "strategy": "toStarter" },
+    "timeout": { "dueInMinutes": 60, "action": "remind" }
   },
   "additionalInfo": {
     "actionPermissions": { "transfer": true, "return": true, "addSign": true, "urge": true },
@@ -113,10 +115,11 @@ For developers who write DSL directly; when the designer saves, it also writes f
 }
 ```
 
-- `candidateType`: `user` / `role` / `dept` / `direct_manager` / `multi_level_manager` / `initiator_select` / `initiator_self`
-- `candidateConfig`: takes `userIds` / `roleIds` / `levels` depending on the type (direct_manager ends at level N; multi_level_manager reviews every level; a negative value means up to the top of the organization); in the `initiator_select` scenario, `selected` supports `${msg.xxx}` resolved from process variables (gflow writes `${msg.selectedUsers}`)
-- `approvalType`: `single` / `or` / `sequential` / `countersign` / `vote`, paired with an `approvalRule` threshold
-- `selfApprovalType`: `allow` / `skip` / `delegate_to_manager` / `delegate_to_department_manager`
-- `rejectStrategy`: `terminate` / `rejectToStarter` / `rejectToPrev` / `rejectToNode` (paired with `rejectTargetNode`)
+- `approver`: the approver configuration. `type` is `user` / `role` / `dept` / `manager` / `multiLevelManager` / `initiatorSelect` / `initiatorSelf`, consuming `userIds` / `roleIds` / `deptIds` / `levels` (`manager` ends at level N; `multiLevelManager` pins level N when positive and walks to the top when negative) / `expression` (`initiatorSelect` takes a `${msg.xxx}` expression template; gflow writes `${msg.selectedUsers}`) depending on the type
+- `approveMode`: `single` (default) / `any` / `all` / `sequential` / `vote`; `vote` pairs with `voteRule`: `{ "type": "majority|percent|count", "value": N }` (percent takes 0–100, count is a fixed number of votes, majority ignores value and applies when unset)
+- `selfApproval`: `none` (default) / `skip` / `autoApprove` / `delegateToManager` / `delegateToDeptManager`
+- `reject`: `{ "strategy": "terminate|toStarter|toPrev|toNode", "target": "nodeId" }`, `terminate` by default; `toNode` requires `target` (a node ID that exists on the chain), and an unreachable target falls back to the Reject/Failure outgoing edges
+- `timeout`: `{ "dueInMinutes": 60, "action": "remind|autoApprove|autoReject" }`, measured from the moment each task is created and executed by the host's overdue sweep
+- At deploy/update time an invalid configuration (unknown values, missing required fields, mutually exclusive combinations) is rejected outright with a node-level error message
 
 See the [Process DSL Specification](/en/guide/dsl) for more.
