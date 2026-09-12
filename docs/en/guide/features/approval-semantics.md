@@ -191,9 +191,11 @@ The node's `configuration.reject` decides where the flow goes when an approval i
 | strategy | Behavior |
 |---|---|
 | `terminate` | Terminates the instance (default) |
-| `toStarter` | Jumps back to the start node (returns to the initiator to revise and resubmit) |
-| `toPrev` | Jumps to the previous `userTask` node for rework |
-| `toNode` | Jumps to the node named by `target` (required; must be a node ID that exists on the chain **and** be an upstream node of the current one; rollback paths crossing fork/join are rejected at deploy time) |
+| `toStarter` | Jumps back to the start node (returns to the initiator to revise and resubmit). Not supported when any parallel gateway (fork/join/inclusive) is downstream of the chain start; rejected at deploy time |
+| `toPrev` | Jumps to the previous `userTask` node for rework. Not supported when the rollback path crosses a parallel gateway (fork/join/inclusive); rejected at deploy time |
+| `toNode` | Jumps to the node named by `target` (required; must be a node ID that exists on the chain **and** be an upstream node of the current one; rollback paths crossing a parallel gateway fork/join/inclusive are rejected at deploy time) |
+
+Cross-branch rollback is rejected outright because re-entering a fork/inclusive re-dispatches tasks on every branch, and re-entering a join waits forever for sibling-branch messages that never arrive. The restriction is enforced at deploy time; legacy definitions that bypassed validation degrade at runtime to the Reject/Failure edge fallback (or termination) instead of double-dispatching.
 
 If the jump target is unreachable (conditions unmet, edge missing, etc.), it falls back to the node's Reject / Failure outgoing edges; with no outgoing edges either, the instance terminates. In multi-person modes, any single rejection triggers the reject (OR-sign first-to-act wins; countersign is a one-vote veto).
 
