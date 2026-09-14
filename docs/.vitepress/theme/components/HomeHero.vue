@@ -10,7 +10,7 @@ const { isEn, link } = useI18n()
 const T = computed(() =>
   isEn.value
     ? {
-        announce: 'Once approved, it runs itself — see approval as automation',
+        announce: 'GFlow v1.2.0 released — approval config rework · upcoming approver preview · mobile web app',
         titleA: 'AI pre-screens · Humans approve ·',
         titleB: 'automation follows.',
         subtitle: 'GFlow Workflow Platform',
@@ -45,7 +45,7 @@ const T = computed(() =>
         ],
       }
     : {
-        announce: '批完，自动办 —— 了解「审批即自动化」',
+        announce: 'GFlow v1.2.0 发布：审批配置重构 · 后续审批人预测 · 移动端 H5',
         titleA: 'AI 先审 · 人再签 ·',
         titleB: '签完自动办。',
         subtitle: 'GFlow 极风工作流平台',
@@ -86,7 +86,7 @@ const T = computed(() =>
   <header class="hero-wrap">
     <div class="hero-grid">
       <div class="hero-copy">
-        <a class="hero-announce" :href="link('/guide/features/automation')">
+        <a class="hero-announce" :href="link('/changelog')">
           <span class="dot"></span>
           {{ T.announce }}
           <span aria-hidden="true">→</span>
