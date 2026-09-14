@@ -90,7 +90,7 @@ const T = computed(() =>
   <section class="home-section paper-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 06 · Quick Start"
+        eyebrow="Section 07 · Quick Start"
         :title="T.head.title"
         :desc="T.head.desc"
       />

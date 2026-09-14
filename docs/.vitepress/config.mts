@@ -21,6 +21,7 @@ export default withMermaid(defineConfig({
         nav: [
           { text: '首页', link: '/' },
           { text: '产品介绍', link: '/guide/introduction/what-is-gflow' },
+          { text: '界面预览', link: '/screenshots' },
           { text: '快速开始', link: '/guide/getting-started/quickstart' },
           {
             text: '核心功能',
@@ -164,6 +165,7 @@ export default withMermaid(defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Overview', link: '/en/guide/introduction/what-is-gflow' },
+          { text: 'Screenshots', link: '/en/screenshots' },
           { text: 'Quick Start', link: '/en/guide/getting-started/quickstart' },
           {
             text: 'Features',

@@ -126,7 +126,7 @@ const head = computed(() =>
   <section class="home-section dark-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 05 · Architecture"
+        eyebrow="Section 06 · Architecture"
         :title="head.title"
         :desc="head.desc"
       />

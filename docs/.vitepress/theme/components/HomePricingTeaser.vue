@@ -26,7 +26,7 @@ const T = computed(() =>
   <section class="home-section paper-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 07 · Pricing"
+        eyebrow="Section 08 · Pricing"
         :title="T.title"
         :desc="T.desc"
       />

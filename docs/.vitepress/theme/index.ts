@@ -8,6 +8,8 @@ import HomeRepos from './components/HomeRepos.vue'
 import HomeCapabilities from './components/HomeCapabilities.vue'
 import HomeProducts from './components/HomeProducts.vue'
 import HomePreview from './components/HomePreview.vue'
+import HomeShots from './components/HomeShots.vue'
+import ShotGallery from './components/ShotGallery.vue'
 import HomeDataModel from './components/HomeDataModel.vue'
 import HomeArchitecture from './components/HomeArchitecture.vue'
 import HomeQuickstart from './components/HomeQuickstart.vue'
@@ -28,6 +30,8 @@ export default {
     app.component('HomeCapabilities', HomeCapabilities)
     app.component('HomeProducts', HomeProducts)
     app.component('HomePreview', HomePreview)
+    app.component('HomeShots', HomeShots)
+    app.component('ShotGallery', ShotGallery)
     app.component('HomeDataModel', HomeDataModel)
     app.component('HomeArchitecture', HomeArchitecture)
     app.component('HomeQuickstart', HomeQuickstart)

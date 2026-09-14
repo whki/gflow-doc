@@ -176,7 +176,7 @@ const T = computed(() =>
   <section class="home-section paper-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 04 · Data Model"
+        eyebrow="Section 05 · Data Model"
         :title="T.head.title"
         :desc="T.head.desc"
       />

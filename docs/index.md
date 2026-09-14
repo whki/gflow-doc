@@ -25,6 +25,7 @@ import { onMounted } from 'vue'
 <HomeCapabilities />
 <HomeProducts />
 <HomePreview />
+<HomeShots />
 <HomeDataModel />
 <HomeArchitecture />
 <HomeQuickstart />
