@@ -2,6 +2,7 @@ import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
 import './custom.css'
 
+import Layout from './Layout.vue'
 import HomeHero from './components/HomeHero.vue'
 import HomeRepos from './components/HomeRepos.vue'
 import HomeCapabilities from './components/HomeCapabilities.vue'
@@ -20,6 +21,7 @@ import DataModelDiagram from './components/DataModelDiagram.vue'
 
 export default {
   extends: DefaultTheme,
+  Layout,
   enhanceApp({ app }) {
     app.component('HomeHero', HomeHero)
     app.component('HomeRepos', HomeRepos)

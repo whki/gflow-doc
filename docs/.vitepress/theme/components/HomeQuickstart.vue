@@ -140,13 +140,14 @@ const T = computed(() =>
 <style scoped>
 .qs-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  /* minmax(0,…)：grid 子项默认 min-width:auto，终端里不换行的代码行会把轨道撑宽、整页横向溢出 */
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 20px;
   align-items: start;
 }
 
 @media (max-width: 960px) {
-  .qs-grid { grid-template-columns: 1fr; }
+  .qs-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 .qs-points {

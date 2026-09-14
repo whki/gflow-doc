@@ -1297,6 +1297,45 @@ html.dark .price-was {
 }
 
 /* ============================================================
+   顶部导航断点：桌面菜单 ≥960px 才显示
+   VitePress 默认 ≥768 显示桌面菜单、<768 才用汉堡抽屉，本站
+   菜单项多，768~960 区间桌面菜单放不下会撑破导航栏、整页横向
+   溢出（手机横屏重灾区）。此区间回落到汉堡抽屉。
+   ============================================================ */
+.VPNavBarMenu {
+  /* !important：压过组件 scoped 样式的 .VPNavBarMenu[data-v-x] 特异性 */
+  display: none !important;
+}
+
+@media (min-width: 960px) {
+  .VPNavBarMenu {
+    display: flex !important;
+  }
+}
+
+/* 汉堡抽屉同步扩到 <960，与桌面菜单断点衔接（VitePress 默认 <768 才有汉堡） */
+.VPNavBarHamburger {
+  display: flex !important;
+}
+
+@media (min-width: 960px) {
+  .VPNavBarHamburger {
+    display: none !important;
+  }
+}
+
+/* 抽屉面板本体同断点：≥768 默认隐藏，须放开到 <960 才接得住汉堡（否则点开无面板） */
+.VPNavScreen {
+  display: flex !important;
+}
+
+@media (min-width: 960px) {
+  .VPNavScreen {
+    display: none !important;
+  }
+}
+
+/* ============================================================
    暗色模式：纸白段落随站点外观切换为墨色系
    纸白段（:root --gf-paper 族）原设计不受暗色模式影响，
    暗色外观下导航/hero 变黑而正文段仍是亮纸色，割裂。

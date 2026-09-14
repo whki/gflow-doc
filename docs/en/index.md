@@ -2,6 +2,18 @@
 layout: page
 sidebar: false
 aside: false
+notice:
+  version: v1.2.0
+  date: 2026-09-14
+  title: GFlow v1.2.0 Released
+  items:
+    - Approval node config rework: approver, approval mode, fallback and reject rules in one place
+    - Preview who approves each upcoming step when starting or approving
+    - New mobile web app: start requests and handle approvals on your phone
+    - Inbox-style approval center: todo / done / mine / cc in one place
+    - AI approval now reads attachments, including images and documents
+  link: /en/changelog
+  linkText: Full changelog
 ---
 
 <script setup>

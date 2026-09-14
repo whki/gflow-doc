@@ -243,7 +243,8 @@ const head = computed(() =>
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
+  /* 允许收缩：nowrap 的步骤胶囊在窄屏会把 flex 父容器撑出横向溢出 */
+  min-width: 0;
   flex-wrap: wrap;
 }
 
