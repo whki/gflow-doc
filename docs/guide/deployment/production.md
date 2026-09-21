@@ -25,7 +25,7 @@ cd gflow && make web            # 内部执行 vite build，产物在 gflow-ui/d
 ```bash
 cd gflow
 
-# 1. 构建后端（预编译二进制）+ 前端镜像
+# 1. 构建全栈单镜像（前端已嵌入二进制；构建机需 Node + Docker，无需 Go）
 make docker-build
 
 # 2. 配置环境变量（至少改 JWT_SECRET / POSTGRES_PASSWORD）
@@ -35,16 +35,15 @@ cp .env.example .env && vi .env
 docker compose up -d
 ```
 
-compose 拉起四个服务：
+compose 拉起三个容器：
 
 | 服务 | 说明 |
 |---|---|
 | `postgres` | 首次启动自动按序执行引擎建表脚本 `00.init_bpm_pg.sql`（7 张 wf_* 表）+ `00.init_pg.sql`（宿主表 + 种子数据） |
 | `redis` | 缓存与（多实例时）分布式锁 |
-| `backend` | gflow-server（REST API，不直接对外暴露） |
-| `frontend`(nginx) | 前端静态资源 + 入口反代 |
+| `gflow` | gflow-server 全栈单镜像：桌面 `/gflow/`、移动 H5 `/m/`、REST API、WebSocket 同端口对外，无 nginx |
 
-访问 `http://localhost/gflow/`，默认账号 **admin / admin123**（首次登录改密）。
+访问 `http://localhost/gflow/`，默认账号 **admin / admin123**（首次登录改密）。宿主机 80 被占时在 `.env` 改 `APP_PORT`；对外访问地址记得同步改 `GFLOW_APP_BASE_URL`（IM 免登链接、密码重置回跳都用它）。
 
 > 双实例/多副本集群部署是**商业版（GFlow Platform）能力**，不使用此 compose，完整步骤见仓库 `docs/deploy/deployment.md` 第七节。
 

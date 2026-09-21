@@ -26,7 +26,7 @@ For a first deployment, run `make db-init` (scripts/init-db.sh) to create the da
 ```bash
 cd gflow
 
-# 1. Build the backend (precompiled binary) + frontend images
+# 1. Build the full-stack single image (frontend embedded; build host needs Node + Docker, no Go)
 make docker-build
 
 # 2. Configure environment variables (change at least JWT_SECRET / POSTGRES_PASSWORD)
@@ -36,16 +36,15 @@ cp .env.example .env && vi .env
 docker compose up -d
 ```
 
-Compose brings up four services:
+Compose brings up three containers:
 
 | Service | Description |
 |---|---|
 | `postgres` | On first startup, automatically executes the engine table-creation script `00.init_bpm_pg.sql` (7 `wf_*` tables) and `00.init_pg.sql` (host tables + seed data) in order |
 | `redis` | Cache and (in multi-instance deployments) distributed lock |
-| `backend` | gflow-server (REST API, not exposed directly to the outside) |
-| `frontend`(nginx) | Frontend static assets + entry reverse proxy |
+| `gflow` | gflow-server all-in-one image: desktop `/gflow/`, mobile H5 `/m/`, REST API and WebSocket on a single port — no nginx needed |
 
-Open `http://localhost/gflow/` and sign in with the default account **admin / admin123** (change the password on first login).
+Open `http://localhost/gflow/` and sign in with the default account **admin / admin123** (change the password on first login). If host port 80 is taken, set `APP_PORT` in `.env`; for access from other machines also update `GFLOW_APP_BASE_URL` (used by IM quick-login links and password-reset callbacks).
 
 > Dual-instance / multi-replica cluster deployment is a **commercial-edition (GFlow Platform) capability** and does not use this compose file; see section 7 of `docs/deploy/deployment.md` in the repository.
 
