@@ -71,6 +71,13 @@ const caps = computed(() =>
           desc: 'jsSwitch gates branch on form variables; fork/join runs branches in parallel; inclusive activates only the matching subset.',
           tags: ['jsSwitch', 'fork', 'inclusive'],
         },
+        {
+          icon: '✉',
+          red: true,
+          title: 'IM Work Notifications',
+          desc: 'To-dos and CCs pushed straight into DingTalk / WeCom / Feishu; tap the card, land login-free, approve on the phone. Directory sync binds accounts automatically.',
+          tags: ['dingtalk-work', 'wecom-work', 'feishu-work'],
+        },
       ]
     : [
         {
@@ -135,6 +142,13 @@ const caps = computed(() =>
           title: '条件 · 并行 · 包容',
           desc: 'jsSwitch 条件网关引用表单变量；fork/join 并行分支；inclusive 部分激活包容分支。',
           tags: ['jsSwitch', 'fork', 'inclusive'],
+        },
+        {
+          icon: '✉',
+          red: true,
+          title: 'IM 工作通知',
+          desc: '待办、抄送实时推送到钉钉 / 企微 / 飞书，点卡片免登直达单据，手机上点开就批；通讯录同步自动绑定。',
+          tags: ['dingtalk-work', 'wecom-work', 'feishu-work'],
         },
       ]
 )

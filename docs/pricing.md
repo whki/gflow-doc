@@ -43,6 +43,7 @@ aside: false
     <tr><td>自动化编排界面</td><td class="pt-no">— 自行实现</td><td class="pt-yes">✓ 触发器 + HTTP/服务任务配置</td></tr>
     <tr><td>组织架构 / 用户 / 角色 / 岗位</td><td class="pt-no">— 自行实现 IdentityService</td><td class="pt-yes">✓ 完整后台</td></tr>
     <tr><td>监控 / 通知 / 操作审计</td><td class="pt-no">— 监听器回调自建</td><td class="pt-yes">✓ 内置</td></tr>
+    <tr><td>IM 工作通知(钉钉 / 企业微信 / 飞书)</td><td class="pt-no">— 三套协议自行对接</td><td class="pt-yes">✓ 待办定向到人 · 点卡片免登即批 · 通讯录同步自动绑定</td></tr>
     <tr><td>多实例集群部署</td><td class="pt-no">— 锁 / 救援原语内嵌，编排自建</td><td class="pt-yes">✓ 双实例 active-active · 选主 / 自动救援 / 配置热生效</td></tr>
     <tr><td colspan="3" class="price-section-title">交付与服务</td></tr>
     <tr><td>许可证</td><td>Apache-2.0</td><td>商业授权（一次性）</td></tr>
@@ -81,6 +82,14 @@ aside: false
 **Q：授权按什么计？服务器台数？用户数？**
 
 都不按。一次授权，内部任意部署，不限实例数、不限用户数。
+
+**Q：员工都在钉钉 / 企业微信 / 飞书上办公，审批能直接推进 IM 吗？**
+
+能，这正是商业版的核心能力之一。内置三家的工作通知定向推送：待办实时到人，卡片免登直达单据，手机上点开就能批；通讯录同步自动完成账号绑定，管理页录入凭证即生效。不按人数加钱——全员推送不另收费。
+
+**Q：审批数据会流经钉钉 / 企微 / 飞书的服务器吗？**
+
+不会留在那里。IM 只收到一张通知卡片（标题 + 去处理链接），金额、事由等业务摘要默认不出 IM；单据、附件与审批审计全部留在你自建的 gflow 服务器上，完全私有化部署。
 
 **Q：拿到的源码可以改吗？**
 

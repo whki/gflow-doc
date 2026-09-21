@@ -33,6 +33,7 @@ export default withMermaid(defineConfig({
               { text: '规则链设计器', link: '/guide/features/rulechain-designer' },
               { text: '智能体（AI 审批）', link: '/guide/features/ai-approval' },
               { text: '自动化编排', link: '/guide/features/automation' },
+              { text: 'IM 工作通知', link: '/guide/features/im-notify' },
               { text: '节点类型', link: '/guide/features/nodes' },
               { text: '流程 DSL', link: '/guide/dsl' },
               { text: 'REST API', link: '/guide/api' },
@@ -86,6 +87,7 @@ export default withMermaid(defineConfig({
                 { text: '规则链设计器', link: '/guide/features/rulechain-designer' },
                 { text: '智能体（AI 审批）', link: '/guide/features/ai-approval' },
                 { text: '自动化编排', link: '/guide/features/automation' },
+                { text: 'IM 工作通知', link: '/guide/features/im-notify' },
               ]
             }
           ],
@@ -156,20 +158,20 @@ export default withMermaid(defineConfig({
     },
 
     en: {
-      label: 'English',
+      label: 'EN',
       lang: 'en-US',
       link: '/en/',
-      title: 'GFlow Workflow Platform',
+      title: 'GFlow',
       description: 'Approvals like the wind. Once approved, it runs itself: AI pre-screens, humans approve, execution follows automatically — open-source GFlow Engine (Apache-2.0) + the commercial GFlow Workflow Platform.',
       themeConfig: {
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Overview', link: '/en/guide/introduction/what-is-gflow' },
-          { text: 'Screenshots', link: '/en/screenshots' },
           { text: 'Quick Start', link: '/en/guide/getting-started/quickstart' },
           {
             text: 'Features',
             items: [
+              { text: 'Screenshots', link: '/en/screenshots' },
               { text: 'Approval Semantics', link: '/en/guide/features/approval-semantics' },
               { text: 'Approval Actions Guide', link: '/en/guide/features/approval-actions' },
               { text: 'Process Designer', link: '/en/guide/features/designer' },
@@ -177,6 +179,7 @@ export default withMermaid(defineConfig({
               { text: 'Rule Chain Designer', link: '/en/guide/features/rulechain-designer' },
               { text: 'AI Agent (AI Approval)', link: '/en/guide/features/ai-approval' },
               { text: 'Automation', link: '/en/guide/features/automation' },
+              { text: 'IM Work Notifications', link: '/en/guide/features/im-notify' },
               { text: 'Node Types', link: '/en/guide/features/nodes' },
               { text: 'Process DSL', link: '/en/guide/dsl' },
               { text: 'REST API', link: '/en/guide/api' },
@@ -186,7 +189,7 @@ export default withMermaid(defineConfig({
           },
           { text: 'Pricing', link: '/en/pricing' },
           { text: 'Changelog', link: '/en/changelog' },
-          { text: 'Live Demo', link: DEMO_URL },
+          { text: 'Demo', link: DEMO_URL },
           { text: 'Community', link: 'https://rulego.cc/pages/community/' },
         ],
 
@@ -229,6 +232,7 @@ export default withMermaid(defineConfig({
                 { text: 'Rule Chain Designer', link: '/en/guide/features/rulechain-designer' },
                 { text: 'AI Agent (AI Approval)', link: '/en/guide/features/ai-approval' },
                 { text: 'Automation', link: '/en/guide/features/automation' },
+                { text: 'IM Work Notifications', link: '/en/guide/features/im-notify' },
               ]
             }
           ],

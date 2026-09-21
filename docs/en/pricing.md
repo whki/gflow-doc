@@ -43,6 +43,7 @@ aside: false
     <tr><td>Automation orchestration UI</td><td class="pt-no">— implement it yourself</td><td class="pt-yes">✓ triggers + HTTP / service task configuration</td></tr>
     <tr><td>Organization / users / roles / positions</td><td class="pt-no">— implement IdentityService yourself</td><td class="pt-yes">✓ full admin backend</td></tr>
     <tr><td>Monitoring / notifications / operation audit</td><td class="pt-no">— build your own from listener callbacks</td><td class="pt-yes">✓ built in</td></tr>
+    <tr><td>IM work notifications (DingTalk / WeCom / Feishu)</td><td class="pt-no">— three protocols, self-integrated</td><td class="pt-yes">✓ to-dos pushed to the person · tap the card, approve login-free · directory sync auto-binding</td></tr>
     <tr><td>Multi-instance cluster deployment</td><td class="pt-no">— lock / rescue primitives built in, wiring is yours</td><td class="pt-yes">✓ dual-instance active-active · leader election / auto rescue / hot config reload</td></tr>
     <tr><td colspan="3" class="price-section-title">Delivery & services</td></tr>
     <tr><td>License</td><td>Apache-2.0</td><td>Commercial license (one-time)</td></tr>
@@ -81,6 +82,14 @@ The engine (GFlow Engine) is open source, with free code updates forever. For th
 **Q: How is the license counted? By number of servers? By users?**
 
 Neither. One license covers any internal deployment, with no limit on instances and no limit on users.
+
+**Q: My staff all work in DingTalk / WeCom / Feishu — can approvals be pushed straight into the IM?**
+
+Yes — that is a core commercial-edition capability. Built-in targeted work notifications for all three platforms: to-dos reach the assignee in real time, cards open the form login-free, approvals happen right on the phone. Directory sync binds accounts automatically, and credentials entered in the admin page take effect immediately. No per-seat charges — pushing to everyone costs nothing extra.
+
+**Q: Do approval data pass through DingTalk / WeCom / Feishu servers?**
+
+Nothing stays there. The IM side only receives a notification card (title + action link); amounts, reasons and other business details stay inside by default. Documents, attachments and audit trails remain entirely on your self-hosted gflow servers — fully private deployment.
 
 **Q: Can I modify the source code I receive?**
 

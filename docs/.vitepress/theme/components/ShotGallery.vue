@@ -23,6 +23,7 @@ const T = computed(() =>
           { src: '/images/screens/d-formdesigner.webp', title: 'Form Designer', desc: 'Drag-and-drop fields, field-level permissions' },
           { src: '/images/screens/d-instances.webp', title: 'Process Instances', desc: 'Admin-side instance monitoring and intervention' },
           { src: '/images/screens/d-agent.webp', title: 'Agent Management', desc: 'AI approval agents bound to skills and integrated into flows' },
+          { src: '/images/screens/d-im.png', title: 'IM Channels & Identity', desc: 'Credentials for all three platforms, effective on save; one-click directory sync' },
         ],
         phones: [
           { src: '/images/screens/m-login.webp', title: 'Login' },
@@ -30,6 +31,9 @@ const T = computed(() =>
           { src: '/images/screens/m-detail.webp', title: 'Approval Detail' },
           { src: '/images/screens/m-create.webp', title: 'Initiate Request' },
           { src: '/images/screens/m-form.webp', title: 'Fill Form' },
+          { src: '/images/screens/m-im-dingtalk.jpg', title: 'DingTalk Notification' },
+          { src: '/images/screens/m-im-wecom.jpg', title: 'WeCom Notification' },
+          { src: '/images/screens/m-im-feishu.jpg', title: 'Feishu Card' },
         ],
       }
     : {
@@ -48,6 +52,7 @@ const T = computed(() =>
           { src: '/images/screens/d-formdesigner.webp', title: '表单设计器', desc: '拖拽字段、字段级权限' },
           { src: '/images/screens/d-instances.webp', title: '流程实例', desc: '管理端实例监控与干预' },
           { src: '/images/screens/d-agent.webp', title: '智能体管理', desc: 'AI 审批智能体绑定技能接入流程' },
+          { src: '/images/screens/d-im.png', title: 'IM 渠道与身份集成', desc: '三家凭证管理页录入即生效；通讯录同步一键绑定' },
         ],
         phones: [
           { src: '/images/screens/m-login.webp', title: '登录' },
@@ -55,6 +60,9 @@ const T = computed(() =>
           { src: '/images/screens/m-detail.webp', title: '审批详情' },
           { src: '/images/screens/m-create.webp', title: '发起申请' },
           { src: '/images/screens/m-form.webp', title: '填写表单' },
+          { src: '/images/screens/m-im-dingtalk.jpg', title: '钉钉工作通知' },
+          { src: '/images/screens/m-im-wecom.jpg', title: '企微应用消息' },
+          { src: '/images/screens/m-im-feishu.jpg', title: '飞书消息卡片' },
         ],
       }
 )
