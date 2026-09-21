@@ -32,13 +32,15 @@ psql -U postgres -d gflow -f gflow/scripts/engine/00.init_bpm_pg.sql
 psql -U postgres -d gflow -f gflow/scripts/00.init_pg.sql
 
 # 2. 构建嵌入前端的单二进制（先构建前端再 go build -tags embed）
+#    前置：gflow 同级摆放 gflow-ui（pnpm）与 rulego-editor（编辑器源码）两仓，首次构建自动装依赖
 cd gflow && make release        # 产出 dist/gflow-server
 
-# 3. 修改 configs/config.yaml 里的数据库连接（dsn），然后在 gflow 目录启动
+# 3. 复制配置样例并修改数据库连接（dsn）等必填项，然后在 gflow 目录启动
+cp configs/config.yaml.example configs/config.yaml
 ./dist/gflow-server             # 监听 :8080，自动读取 configs/config.yaml
 ```
 
-> 也可以用 `make db-init`（内部执行 scripts/init-db.sh，自动定位引擎脚本）或 Docker Compose（postgres 容器首启自动按序执行两个脚本）完成建库。
+> 也可以用 `make db-init`（内部执行 scripts/init-db.sh，自动定位引擎脚本；连接信息取自 `DB_*` 环境变量，默认 localhost + postgres/postgres/gflow，MySQL 默认账号 root，不读 config.yaml）或 Docker Compose（postgres 容器首启自动按序执行两个脚本）完成建库。
 
 浏览器打开 `http://localhost:8080/gflow/`，默认账号 `admin / admin123`。Docker Compose 部署见[部署指南](/guide/deployment/production)。
 

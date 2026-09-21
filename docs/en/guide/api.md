@@ -114,7 +114,7 @@ curl -X POST http://localhost:8080/api/v1/workflow/tasks/{taskId}/approve \
 
 This page lists only the three core approval endpoint groups. Other modules:
 
-- **Rule chains / agents**: bridged through the embedded rulego-server under `/rulego/api/v1/*` (rules, logs, skills, components, etc.), with RBAC mapped through gflow permission points; plus the gflow-native `GET /api/v1/components?scope=bpm|rulechain`. For the full contract and permission mapping, see `docs/规则链模块API接口文档.md` in the repository
+- **Rule chains / agents**: bridged through the embedded rulego-server under `/rulego/api/v1/*` (rules, logs, skills, components, etc.), with RBAC mapped through gflow permission points; plus the gflow-native `GET /api/v1/components?scope=bpm|rulechain`. For the full contract, refer to the live `/rulego/api/v1/*` endpoints and `docs/swagger/` (the Swagger spec) in the repository
 - **Forms / skills / LLM / notifications**: also under `/api/v1`, sharing JWT authentication and the `{code, data, message}` envelope with the approval endpoints above; paths are listed in `gflow/internal/router/router.go`
 
 ## Go API

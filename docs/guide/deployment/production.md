@@ -7,18 +7,23 @@ gflow 是 Go 单二进制 + 前端静态资源，2C2G 起步即可。推荐 syst
 ## 裸机 / systemd（推荐）
 
 ```bash
-# 后端：Go 编译单二进制。make build 为 API-only 版（不嵌入前端，前端走外部 nginx）；
-# 需要单二进制全栈时用 make release（先构建前端再 go build -tags embed 嵌入）
-cd gflow && make build          # 产出 dist/gflow-server
-./dist/gflow-server             # 在 gflow 目录运行，自动读取 configs/config.yaml
+# 推荐：单二进制全栈（前端已内嵌，直接访问 :8080/gflow/，无需 nginx）。
+# 前置：gflow 同级摆放 gflow-ui（包管理器 pnpm）与 rulego-editor（编辑器源码，构建期引用），
+# 首次构建自动安装依赖；拿到预编译交付包的可用其二进制跳过构建。
+cd gflow && make release      # 产出 dist/gflow-server
 
-# 前端：构建产物由 nginx 托管（含 base 路径的构建走 make web）
-cd gflow && make web            # 内部执行 vite build，产物在 gflow-ui/dist
+# 配置并启动（仓库只带样例文件，先复制再改数据库连接等必填项）
+cp configs/config.yaml.example configs/config.yaml
+./dist/gflow-server           # 在 gflow 目录运行，自动读取 configs/config.yaml
+
+# 备选：前后端分离（前端需独立发布/扩容时）——make build 为 API-only 版（不嵌入前端），
+# 前端 make web 构建产物由 nginx 托管（/gflow/、/m/、/api/、/api/v1/ws/、/rulego/ 五个 location）
+cd gflow && make build && make web
 ```
 
-`deploy/systemd/` 提供服务单元模板；`deploy/nginx/` 提供前端反代配置。服务端默认监听 `:8080`。
+`deploy/systemd/` 提供服务单元模板；`deploy/nginx/` 提供前端反代配置（含 `/rulego/`——规则链/智能体编辑器接口）。服务端默认监听 `:8080`。
 
-首次部署先执行 `make db-init`（scripts/init-db.sh）完成建库建表——程序启动不建核心表，见下文[数据库初始化](#数据库初始化)。
+首次部署先执行 `make db-init`（scripts/init-db.sh）完成建库建表——**程序启动不建核心表，两个脚本缺一不可**，见下文[数据库初始化](#数据库初始化)。注意 init-db.sh 的连接信息取自 `DB_*` 环境变量（默认 `localhost` + postgres/postgres/gflow；MySQL 默认账号 root），**不读 config.yaml**。
 
 ## Docker Compose 一键部署
 
@@ -28,7 +33,7 @@ cd gflow
 # 1. 构建全栈单镜像（前端已嵌入二进制；构建机需 Node + Docker，无需 Go）
 make docker-build
 
-# 2. 配置环境变量（至少改 JWT_SECRET / POSTGRES_PASSWORD）
+# 2. 配置环境变量（至少改 GFLOW_JWT_SECRET（≥32 字符随机串，release 模式弱密钥拒绝启动）/ POSTGRES_PASSWORD）
 cp .env.example .env && vi .env
 
 # 3. 启动全栈
@@ -68,7 +73,9 @@ GFlow Platform 支持多实例 active-active 集群部署：同一份代码同�
 
 ## 生产清单
 
-- [ ] 修改 `JWT_SECRET`、数据库口令，勿用默认值
+- [ ] 修改 `GFLOW_JWT_SECRET`（≥32 字符随机串）、数据库口令，勿用默认值
+- [ ] `server.swagger_enabled: false`（Swagger 含完整 API 面且无需认证，生产保持关闭）、`captcha.enable_universal_code: false`
+- [ ] 默认管理员 `admin / admin123` 首次登录立即改密
 - [ ] PostgreSQL 生产实例 + 定期备份（历史表只增不减）
 - [ ] HTTPS：nginx 前置证书
 - [ ] 多副本集群部署时 `cache.global.type: redis` + `cluster.enabled: true`（分布式门闩、选主、WS 广播、token 黑名单共用该 Redis；Redis 建议 AOF），详见仓库部署文档第七节

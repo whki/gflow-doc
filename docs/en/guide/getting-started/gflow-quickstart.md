@@ -34,14 +34,17 @@ psql -U postgres -d gflow -f gflow/scripts/00.init_pg.sql
 
 # 2. Build the single binary with the frontend embedded
 #    (build the frontend first, then go build -tags embed)
+#    Prerequisite: gflow-ui (pnpm) and rulego-editor (editor sources) cloned as siblings of gflow;
+#    dependencies are installed automatically on the first build
 cd gflow && make release        # produces dist/gflow-server
 
-# 3. Update the database connection (dsn) in configs/config.yaml,
+# 3. Copy the sample config, update the database connection (dsn) and other required fields,
 #    then start from the gflow directory
+cp configs/config.yaml.example configs/config.yaml
 ./dist/gflow-server             # listens on :8080 and reads configs/config.yaml automatically
 ```
 
-> You can also set up the database with `make db-init` (which runs scripts/init-db.sh internally and locates the engine script automatically) or with Docker Compose (the postgres container runs both scripts in order automatically on first start).
+> You can also set up the database with `make db-init` (which runs scripts/init-db.sh internally and locates the engine script automatically; connection info comes from `DB_*` env vars — defaults to localhost + postgres/postgres/gflow, MySQL default account root — and is NOT read from config.yaml) or with Docker Compose (the postgres container runs both scripts in order automatically on first start).
 
 Open `http://localhost:8080/gflow/` in a browser; the default account is `admin / admin123`. For Docker Compose deployment, see the [Deployment Guide](/en/guide/deployment/production).
 

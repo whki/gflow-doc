@@ -14,8 +14,8 @@
 |---|---|
 | 操作系统 | Linux / Windows / macOS（Go 交叉编译随便换） |
 | Go | 1.25+（源码编译服务端） |
-| Node.js | ≥ 20.19（Vite 7 下限；推荐 24.x）。前端仓库 gflow-ui 使用 pnpm（preinstall 强制校验，用 npm 会直接失败） |
-| 数据库 | PostgreSQL（生产推荐）或 MySQL；国产数据库等经方言扩展接入，见[自定义数据库方言](/guide/deployment/custom-dialect) |
+| Node.js | ≥ 20.19（Vite 7 下限；推荐 24.x）。前端仓库 gflow-ui 使用 pnpm（preinstall 强制校验，用 npm 会直接失败），且构建时需同级存在 rulego-editor 仓库（编辑器源码，构建期引用） |
+| 数据库 | PostgreSQL ≥13（生产推荐）或 MySQL ≥8；SQLite 仅开发测试（FOR UPDATE 行锁为空实现，禁用于生产/多实例）；国产数据库等经方言扩展接入，见[自定义数据库方言](/guide/deployment/custom-dialect) |
 | 硬件 | 2C2G 起步即可运行（演示环境 1.9G 内存的云主机跑得很稳） |
 | 可选 | Redis（多实例部署时的分布式锁） |
 

@@ -7,19 +7,25 @@ gflow is a single Go binary plus frontend static assets — 2 vCPU / 2 GB RAM is
 ## Bare Metal / systemd (Recommended)
 
 ```bash
-# Backend: a Go-compiled single binary. `make build` produces the API-only build (frontend not
-# embedded; the frontend is served by an external nginx); for a single all-in-one binary use
-# `make release` (builds the frontend first, then embeds it via go build -tags embed)
-cd gflow && make build          # produces dist/gflow-server
-./dist/gflow-server             # run from the gflow directory; automatically loads configs/config.yaml
+# Recommended: all-in-one single binary (frontend embedded; visit :8080/gflow/ directly, no nginx).
+# Prerequisite: gflow-ui (pnpm) and rulego-editor (editor sources) cloned as siblings of gflow;
+# dependencies are installed automatically on the first build.
+cd gflow && make release      # produces dist/gflow-server
 
-# Frontend: build artifacts are served by nginx (for a build with the base path, use make web)
-cd gflow && make web            # runs vite build internally; artifacts land in gflow-ui/dist
+# Configure and start (the repo only ships a sample file — copy it first, then edit the
+# database connection and other required fields)
+cp configs/config.yaml.example configs/config.yaml
+./dist/gflow-server           # run from the gflow directory; automatically loads configs/config.yaml
+
+# Alternative: separated frontend/backend (when the frontend needs independent scaling) —
+# `make build` produces the API-only binary; `make web` artifacts are served by nginx
+# (five locations: /gflow/, /m/, /api/, /api/v1/ws/, /rulego/)
+cd gflow && make build && make web
 ```
 
-`deploy/systemd/` provides systemd service unit templates; `deploy/nginx/` provides the frontend reverse-proxy configuration. The server listens on `:8080` by default.
+`deploy/systemd/` provides systemd service unit templates; `deploy/nginx/` provides the frontend reverse-proxy configuration (including `/rulego/` — the rule-chain/agent editor API). The server listens on `:8080` by default.
 
-For a first deployment, run `make db-init` (scripts/init-db.sh) to create the database and tables — program startup does not create the core tables; see [Database Initialization](#database-initialization) below.
+For a first deployment, run `make db-init` (scripts/init-db.sh) to create the database and tables — **program startup does not create the core tables; both scripts are required**; see [Database Initialization](#database-initialization) below. Note that init-db.sh takes its connection info from `DB_*` env vars (defaults: localhost + postgres/postgres/gflow; MySQL default account root) and does NOT read config.yaml.
 
 ## Docker Compose One-Command Deployment
 
@@ -29,7 +35,7 @@ cd gflow
 # 1. Build the full-stack single image (frontend embedded; build host needs Node + Docker, no Go)
 make docker-build
 
-# 2. Configure environment variables (change at least JWT_SECRET / POSTGRES_PASSWORD)
+# 2. Configure environment variables (change at least GFLOW_JWT_SECRET (random, >=32 chars; weak keys are rejected in release mode) / POSTGRES_PASSWORD)
 cp .env.example .env && vi .env
 
 # 3. Start the full stack
@@ -69,10 +75,12 @@ Dependencies: shared PostgreSQL/MySQL + Redis (AOF persistence recommended) + a 
 
 ## Production Checklist
 
-- [ ] Change `JWT_SECRET` and the database password — never keep the defaults
+- [ ] Change `GFLOW_JWT_SECRET` (random, ≥32 chars — weak keys are rejected in release mode) and the database password — never keep the defaults
+- [ ] `server.swagger_enabled: false` (Swagger exposes the full API surface without authentication) and `captcha.enable_universal_code: false`
+- [ ] Change the default `admin / admin123` password on first login
 - [ ] A production PostgreSQL instance with scheduled backups (history tables are append-only)
 - [ ] HTTPS: terminate certificates at a fronting nginx
-- [ ] In multi-instance deployments, enable the Redis distributed lock (injected via `WorkflowEngineBuilder.SetLocker`) for row-level mutual exclusion per process instance
+- [ ] In multi-instance deployments, set `cache.global.type: redis` + `cluster.enabled: true` (the distributed gate, leader election, WS broadcast and token blacklist share that Redis; AOF recommended) — see section 7 of the repository deployment doc
 - [ ] Log collection; disk-usage alerting for the `logs/` directory
 - [ ] Separate demo/production accounts; enable operation auditing for administrators
 

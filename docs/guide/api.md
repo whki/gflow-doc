@@ -114,7 +114,7 @@ curl -X POST http://localhost:8080/api/v1/workflow/tasks/{taskId}/approve \
 
 本页只列审批核心三组端点，其余模块：
 
-- **规则链 / 智能体**：内嵌 rulego-server 桥接，挂在 `/rulego/api/v1/*`（规则、日志、技能、组件等），RBAC 经 gflow 权限点映射；另有 gflow 原生的 `GET /api/v1/components?scope=bpm|rulechain`。完整契约与权限映射见仓库 `docs/规则链模块API接口文档.md`
+- **规则链 / 智能体**：内嵌 rulego-server 桥接，挂在 `/rulego/api/v1/*`（规则、日志、技能、组件等），RBAC 经 gflow 权限点映射；另有 gflow 原生的 `GET /api/v1/components?scope=bpm|rulechain`。完整契约以运行中的 `/rulego/api/v1/*` 端点与仓库 `docs/swagger/`（Swagger spec）为准
 - **表单 / 技能 / LLM / 通知**：同样在 `/api/v1` 下，与上述审批端点共用 JWT 认证与 `{code, data, message}` 信封，路径见 `gflow/internal/router/router.go`
 
 ## Go API

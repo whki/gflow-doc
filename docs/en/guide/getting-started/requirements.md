@@ -14,8 +14,8 @@
 |---|---|
 | Operating system | Linux / Windows / macOS (switch freely via Go cross-compilation) |
 | Go | 1.25+ (to build the server from source) |
-| Node.js | ≥ 20.19 (the minimum for Vite 7; 24.x recommended). The frontend repo gflow-ui uses pnpm (enforced by a preinstall check — npm will simply fail) |
-| Database | PostgreSQL (recommended for production) or MySQL; domestic Chinese databases and others connect via dialect extensions — see [Custom Database Dialect](/en/guide/deployment/custom-dialect) |
+| Node.js | ≥ 20.19 (the minimum for Vite 7; 24.x recommended). The frontend repo gflow-ui uses pnpm (enforced by a preinstall check — npm will simply fail) and requires the rulego-editor repo cloned as a sibling (editor sources, referenced at build time) |
+| Database | PostgreSQL ≥13 (recommended for production) or MySQL ≥8; SQLite is for development/testing only (its FOR UPDATE row lock is a no-op — never use it in production or multi-instance setups); domestic Chinese databases and others connect via dialect extensions — see [Custom Database Dialect](/en/guide/deployment/custom-dialect) |
 | Hardware | 2 CPU cores and 2 GB RAM are enough to get started (the demo environment runs rock-solid on a cloud instance with 1.9 GB of memory) |
 | Optional | Redis (distributed locking for multi-instance deployments) |
 
