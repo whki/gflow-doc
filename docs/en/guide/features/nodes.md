@@ -35,7 +35,7 @@ The core node: when the process reaches it, a todo is created for the approvers,
 - Self-approval (`selfApproval`), for when the approver happens to be the initiator: `none` no filtering (default) / `skip` remove the initiator / `autoApprove` keep the initiator / `delegateToManager` hand over to the direct manager / `delegateToDeptManager` hand over to the department head
 - Empty-approver fallback (`emptyApproverPolicy`), for when no approver resolves: `tenant_admin` route to the tenant admin (default) / `auto_approve` complete as approved by the system / `park` park the task awaiting assignment (an admin assigns it directly in task monitoring)
 - Field permissions: control whether each form field is editable / read-only / hidden for this approver (read-only and hidden fields are never overwritten on submission)
-- Action permissions: show or hide buttons such as transfer, add-sign, return, and urge; at the flow level there are additionally the recall switch (`recall`, enabled by default) and the terminal-recall window (`recallWindowDays`, 7 days by default)
+- Action permissions: show or hide buttons such as transfer, add-sign, return, and urge; at the flow level there are additionally the recall switch (`recall`, enabled by default), the terminal-recall window (`recallWindowDays`, 7 days by default), and the admin proxy-audit switch (`proxyAudit`, enabled by default; only an explicit change disables proxy auditing for that flow)
 
 ### CC Node (ccTask)
 

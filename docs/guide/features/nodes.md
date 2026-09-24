@@ -35,7 +35,7 @@
 - 自审（`selfApproval`）：审批人恰好是发起人时——`none` 不过滤（缺省）/ `skip` 移除发起人 / `autoApprove` 保留发起人 / `delegateToManager` 转交直接上级 / `delegateToDeptManager` 转交部门负责人
 - 审批人为空兜底（`emptyApproverPolicy`）：解析不到审批人时——`tenant_admin` 转交租户管理员（缺省）/ `auto_approve` 系统按通过办结 / `park` 挂起待指派（管理员在任务监控里直接指派）
 - 字段权限：控制该审批人对表单字段的 可编辑 / 只读 / 隐藏（提交时只读和隐藏字段不会被覆盖）
-- 动作权限：转办、委派、加签、退回、催办等按钮的显隐；流程级另有收回（`recall`，缺省开启）开关与终态收回窗口（`recallWindowDays`，缺省 7 天）
+- 动作权限：转办、委派、加签、退回、催办等按钮的显隐；流程级另有收回（`recall`，缺省开启）开关与终态收回窗口（`recallWindowDays`，缺省 7 天），以及管理员代审（`proxyAudit`，缺省开启，显式关闭后该流程不可代审）
 
 ### 抄送节点（ccTask）
 

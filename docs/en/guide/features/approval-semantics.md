@@ -131,7 +131,7 @@ Tasks are created from the node's `configuration.approver` `type`. The candidate
 
 ## Empty-approver Fallback (emptyApproverPolicy)
 
-When resolution yields an **empty set** (a role with no members, no approver selected by the initiator, everyone filtered out by self-approval), the node falls back per `configuration.emptyApproverPolicy` instead of failing the instance:
+When resolution yields an **empty set** (a role with no members, no approver selected by the initiator, everyone filtered out by self-approval), the node falls back per `configuration.emptyApproverPolicy` — the instance is handled by the fallback policy and does not fail for lack of an approver:
 
 | Policy | Behavior |
 |---|---|
@@ -170,7 +170,7 @@ Role/department candidate tasks are first come, first served: anyone in the cand
 
 ### Recall
 
-An approver voids their own approved ticket and puts it back in their to-do list (user-facing guide in [Approval Actions](/en/guide/features/approval-actions)). The engine guards: own latest ticket, no later handling record (ballots from the same countersign round excluded), the instance still parked on an `active`/`pending` userTask, and no automation node on the recall path (BFS along Success edges, fail-closed on unknown node types). On execution: tasks created after the ticket are archived (`end_reason` prefixed "recalled by approver"), the ticket is marked `recalled` (shown as "Recalled" on the timeline), and the recalling user's task is rebuilt (inheriting the parent task / approval rule / sequence position, with stale `approved`/`comment` variables stripped to prevent silent auto-approval). Completed instances support **terminal recall**: initiator or workflow admin only, within the `recallWindowDays` window (7 days by default); the runtime row is revived under its original primary key and the last node re-runs a full review round, with compensating re-archive on failure.
+An approver voids their own latest vote (approval or rejection) and puts it back in their to-do list (user-facing guide in [Approval Actions](/en/guide/features/approval-actions)). The engine guards: own latest vote (approval or rejection), the ticket not produced by an admin proxy audit, no later handling record (ballots from the same countersign round excluded), the instance still parked on an `active`/`pending` userTask, and no automation node on the recall path (BFS along Success edges, fail-closed on unknown node types). On execution: tasks created after the ticket are archived (`end_reason` prefixed "recalled by approver"), the ticket is marked `recalled` (shown as "Recalled" on the timeline), and the recalling user's task is rebuilt (inheriting the parent task / approval rule / sequence position, with stale `approved`/`comment` variables stripped to prevent silent auto-approval). Completed instances support **terminal recall**: initiator or workflow admin only, within the `recallWindowDays` window (7 days by default); the runtime row is revived under its original primary key and the last node re-runs a full review round, with compensating re-archive on failure.
 
 ### Withdraw
 
