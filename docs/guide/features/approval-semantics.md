@@ -129,6 +129,18 @@ flowchart LR
 | `initiatorSelect` | 发起人提交时自选：`expression` 表达式模板（如 `${msg.selectedUsers}`）从流程变量解析审批人 |
 | `initiatorSelf` | 发起人本人（自审场景） |
 
+## 审批人为空兜底（emptyApproverPolicy）
+
+解析结果为**空集合**（角色下暂无成员、发起人未自选到人、自审过滤后无人）时，节点按 `configuration.emptyApproverPolicy` 兜底，实例不再失败终止：
+
+| 策略 | 行为 |
+|---|---|
+| `tenant_admin`（缺省） | 转交租户管理员办理：唯一管理员直接建单任务，多名管理员产生待认领任务；解析不到管理员时降级 `park`。发起人自己就是唯一管理员时改为自动通过（防自批绕过） |
+| `auto_approve` | 任务照建后由系统以发起人受里按通过办结，审批记录注明兜底来源；无发起人时降级 `park`。会签/票签场景合成单票结构（`any` 1 票即过），避免原阈值把自动通过判成自动拒绝 |
+| `park` | 任务照建并停泊待指派：候选为空时写入 `__parked__` 占位（封死被任意同租户用户认领的口子），等待管理员在任务监控中直接指派或补候选人 |
+
+兜底发生时任务变量写入 `fallback_policy` / `fallback_from` / `fallback_reason` / `fallback_time` 四件套留痕（口径对齐 `reassign_*`），详情页与通知据此展示"这单为何绕过了原审批人配置"。自动通过钩子只认带 `fallback_reason` 的任务，常规流转里"审批人恰好是发起人"的任务不受影响。
+
 ## 办理中的动作
 
 ### 加签 / 减签
@@ -155,6 +167,10 @@ flowchart LR
 ### 签收 / 抢单
 
 角色/部门候选任务先到先签：候选池中任何人可签收（`claimed_at` 记录时间），签收后其他人不可再办。
+
+### 收回
+
+审批人撤销自己已通过的票重新待审（面向用户的操作说明见[审批动作指南](/guide/features/approval-actions)）。引擎守卫全集：本人最近一票、无更晚办理记录（同会签轮次的同伴投票除外）、实例仍停泊在 `active`/`pending` 的 userTask 上、收回路径上无自动化节点（沿 Success 出边 BFS，未知节点类型 fail-closed）。收回执行时：自己之后的在途任务归档（`end_reason` 前缀「审批人收回」）、该票标记 `recalled` 并在时间线显示「已收回」、收回人任务重建（沿用父任务 / 审批规则 / 顺序位次，剔除旧 `approved`/`comment` 变量防静默自动通过）。已完结实例支持**终态收回**：限发起人或 workflow admin，须在 `recallWindowDays` 窗口内（缺省 7 天），按原主键复活运行行并重入末节点整轮重审，失败补偿回归档。
 
 ### 撤回
 
@@ -220,6 +236,8 @@ flowchart LR
 ```
 
 发起人侧另有 `suspend` / `withdraw` / `terminate` / `resubmit` 等实例级开关。设计器里逐节点可视化配置。
+
+**收回（recall）是流程级开关**，配在 `ruleChain.additionalInfo.actionPermissions`，与上述节点级动作不同层：缺省开启（opt-out），显式置 `false` 才禁用；同层的 `recallWindowDays`（1-365）控制已完结实例终态收回的窗口天数，缺省 7 天。
 
 ## 部署期校验
 

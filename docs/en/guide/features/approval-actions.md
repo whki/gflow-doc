@@ -17,6 +17,7 @@ When a handler opens a document under "My Approvals", the high-frequency **Appro
 | Return | Handler | return enabled in designer | Goes back to the last completed approval node for rework |
 | Add-sign | Handler | addSign enabled in designer | Extra approvers review first; you decide after all of them |
 | Remove-sign | Handler | reduceSign enabled in designer | Removes add-sign / countersign members who have not acted |
+| Recall | Handler (own latest approval) | No one has acted after you; recall not disabled on the flow (default on) | Downstream tasks void; the flow returns to you for re-approval |
 | Withdraw | Initiator | Instance in flight | Instance terminates; the form can be revised and resubmitted |
 | Urge | Initiator / admin | urge enabled in designer | The handler gets a reminder; status unchanged |
 
@@ -61,3 +62,30 @@ When the previous step was approved in error, use "Return" to send the document 
 ## Withdraw
 
 Second thoughts after submitting: the initiator can withdraw an in-flight application from "My Applications". The instance terminates (marked "withdrawn by applicant"), all in-flight tasks are voided, and the form can be revised and resubmitted. Completed flows cannot be withdrawn.
+
+## Recall
+
+The approver's version of second thoughts: recall your own recently approved ticket as long as nobody has acted after you. All tasks created after your approval are voided (their handlers get notified), the flow returns to your to-do list for re-approval, and the timeline shows the ticket as "Recalled".
+
+**You can recall when**:
+
+- Your latest ticket is approved and the downstream node has not been handled yet (a task still pending for claim counts as "not handled")
+- In sequential / countersign scenarios, you were the last handler of the round and nobody has acted after you
+- Completed applications: the initiator or an admin can recall the whole instance within the recall window (default 7 days, adjustable per flow in the designer's advanced settings, 1-365 days); the last node reopens for re-review and the instance re-archives afterwards
+
+**You cannot recall when**:
+
+- Someone has already handled a node after you (a later handling record exists)
+- An automation action has run after your approval (HTTP calls, automation nodes — effects that cannot be safely rolled back)
+- The instance is suspended, or a completed application is past its recall window
+- Only your own tickets can be recalled; flows that explicitly disable "Recall" in the designer (enabled by default)
+
+## Out-of-office Delegation
+
+On leave, on a business trip, or away for an extended period: set a delegation rule under **Personal Center → Out-of-office Delegation**. While the rule is active, newly created approval tasks are automatically routed to your delegate. The task detail marks it as a delegated task so the delegate knows why it arrived; the delegate approves or rejects normally and the decision counts in the record.
+
+- The delegate must be an enabled user in the same tenant, not yourself; only one active rule per time window, and chained delegation is not allowed (your delegate cannot set up their own delegation in the same window)
+- Optionally transfer existing to-dos when creating the rule; "Transfer existing" can also be run later as a retry
+- When the rule ends or expires, new tasks return to you; already-transferred tasks stay put
+- When an employee leaves, the admin performs "Disable and hand over": the system creates a long-term delegation rule, transfers in-flight tasks, and new tasks fall back to the department head or tenant admin — nothing is left dangling
+- Unlike [Transfer](#transfer-vs-delegate), out-of-office delegation routes **new tasks automatically by person + time window**; transfer only moves the one task at hand

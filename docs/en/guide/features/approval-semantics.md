@@ -129,6 +129,18 @@ Tasks are created from the node's `configuration.approver` `type`. The candidate
 | `initiatorSelect` | Chosen by the initiator at submission: the `expression` template (e.g. `${msg.selectedUsers}`) resolves the approvers from process variables |
 | `initiatorSelf` | The initiator themselves (self-approval scenario) |
 
+## Empty-approver Fallback (emptyApproverPolicy)
+
+When resolution yields an **empty set** (a role with no members, no approver selected by the initiator, everyone filtered out by self-approval), the node falls back per `configuration.emptyApproverPolicy` instead of failing the instance:
+
+| Policy | Behavior |
+|---|---|
+| `tenant_admin` (default) | Routed to the tenant admin(s): a single admin gets a direct task, multiple admins get a claim task; degrades to `park` if no admin resolves. If the initiator is the only admin, auto-approves instead (no self-approval bypass) |
+| `auto_approve` | The task is created and then auto-completed as approved by the system in the initiator's name, with the fallback noted in the record; degrades to `park` without an initiator. Countersign/vote scenarios synthesize a single-ballot structure (`any`, one vote passes) so the original threshold cannot turn the auto-approve into an auto-reject |
+| `park` | The task is created and parked awaiting assignment: an empty candidate pool gets the `__parked__` placeholder (sealing the hole where any tenant user could claim it) until an admin assigns it directly or adds candidates in task monitoring |
+
+When a fallback fires, the task variables carry `fallback_policy` / `fallback_from` / `fallback_reason` / `fallback_time` (mirroring the `reassign_*` convention) so the detail page and notifications can explain why the original approver configuration was bypassed. The auto-approve hook only touches tasks carrying `fallback_reason` — regular flows where the approver merely happens to be the initiator are unaffected.
+
 ## Actions During Processing
 
 ### Add-sign / Remove-sign
@@ -155,6 +167,10 @@ Both hand the task to someone else — the difference is **who produces the fina
 ### Claim / Grab
 
 Role/department candidate tasks are first come, first served: anyone in the candidate pool can claim the task (`claimed_at` records the time), and once claimed no one else can process it.
+
+### Recall
+
+An approver voids their own approved ticket and puts it back in their to-do list (user-facing guide in [Approval Actions](/en/guide/features/approval-actions)). The engine guards: own latest ticket, no later handling record (ballots from the same countersign round excluded), the instance still parked on an `active`/`pending` userTask, and no automation node on the recall path (BFS along Success edges, fail-closed on unknown node types). On execution: tasks created after the ticket are archived (`end_reason` prefixed "recalled by approver"), the ticket is marked `recalled` (shown as "Recalled" on the timeline), and the recalling user's task is rebuilt (inheriting the parent task / approval rule / sequence position, with stale `approved`/`comment` variables stripped to prevent silent auto-approval). Completed instances support **terminal recall**: initiator or workflow admin only, within the `recallWindowDays` window (7 days by default); the runtime row is revived under its original primary key and the last node re-runs a full review round, with compensating re-archive on failure.
 
 ### Withdraw
 
@@ -220,6 +236,8 @@ Each `userTask` can finely toggle the actions available to its approver via `add
 ```
 
 On the initiator side there are additional instance-level switches such as `suspend` / `withdraw` / `terminate` / `resubmit`. All of these are configured visually, node by node, in the Process Designer.
+
+**Recall is a flow-level switch**, configured in `ruleChain.additionalInfo.actionPermissions` — a different layer from the per-node actions above: enabled by default (opt-out), only an explicit `false` disables it; `recallWindowDays` (1-365) on the same level controls the terminal-recall window for completed instances, defaulting to 7 days.
 
 ## Deploy-Time Validation
 

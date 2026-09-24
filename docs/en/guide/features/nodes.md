@@ -33,8 +33,9 @@ The core node: when the process reaches it, a todo is created for the approvers,
 - Timeout (`timeout`): `dueInMinutes` deadline duration + `action` overdue action (`remind` / `autoApprove` / `autoReject`), measured from the moment each task is created and handled uniformly by the platform's overdue sweep
 - Reject (`reject`): `strategy` is `terminate` (default) / `toStarter` back to the initiator / `toPrev` previous node / `toNode` a specified node (with `target`); if the jump target is unreachable it falls back to the node's Reject/Failure outgoing edges, and terminates when there is none
 - Self-approval (`selfApproval`), for when the approver happens to be the initiator: `none` no filtering (default) / `skip` remove the initiator / `autoApprove` keep the initiator / `delegateToManager` hand over to the direct manager / `delegateToDeptManager` hand over to the department head
+- Empty-approver fallback (`emptyApproverPolicy`), for when no approver resolves: `tenant_admin` route to the tenant admin (default) / `auto_approve` complete as approved by the system / `park` park the task awaiting assignment (an admin assigns it directly in task monitoring)
 - Field permissions: control whether each form field is editable / read-only / hidden for this approver (read-only and hidden fields are never overwritten on submission)
-- Action permissions: show or hide buttons such as transfer, add-sign, return, and urge
+- Action permissions: show or hide buttons such as transfer, add-sign, return, and urge; at the flow level there are additionally the recall switch (`recall`, enabled by default) and the terminal-recall window (`recallWindowDays`, 7 days by default)
 
 ### CC Node (ccTask)
 
@@ -105,6 +106,7 @@ For developers who write DSL directly; when the designer saves, it also writes f
     "approver": { "type": "user", "userIds": ["480356539643727872"] },
     "approveMode": "single",
     "selfApproval": "none",
+    "emptyApproverPolicy": "tenant_admin",
     "reject": { "strategy": "toStarter" },
     "timeout": { "dueInMinutes": 60, "action": "remind" }
   },
@@ -118,6 +120,7 @@ For developers who write DSL directly; when the designer saves, it also writes f
 - `approver`: the approver configuration. `type` is `user` / `role` / `dept` / `manager` / `multiLevelManager` / `initiatorSelect` / `initiatorSelf`, consuming `userIds` / `roleIds` / `deptIds` / `levels` (`manager` ends at level N; `multiLevelManager` pins level N when positive and walks to the top when negative) / `expression` (`initiatorSelect` takes a `${msg.xxx}` expression template; gflow writes `${msg.selectedUsers}`) depending on the type
 - `approveMode`: `single` (default) / `any` / `all` / `sequential` / `vote`; `vote` pairs with `voteRule`: `{ "type": "majority|percent|count", "value": N }` (percent takes 0–100, count is a fixed number of votes, majority ignores value and applies when unset)
 - `selfApproval`: `none` (default) / `skip` / `autoApprove` / `delegateToManager` / `delegateToDeptManager`
+- `emptyApproverPolicy`: the fallback when approver resolution yields an empty set — `tenant_admin` (default, routed to the tenant admins; auto-approves when the initiator is the only admin) / `auto_approve` (completed as approved by the system, with an audit trail) / `park` (parked awaiting assignment); the task variables carry a `fallback_*` trail
 - `reject`: `{ "strategy": "terminate|toStarter|toPrev|toNode", "target": "nodeId" }`, `terminate` by default; `toNode` requires `target` (a node ID that exists on the chain), and an unreachable target falls back to the Reject/Failure outgoing edges
 - `timeout`: `{ "dueInMinutes": 60, "action": "remind|autoApprove|autoReject" }`, measured from the moment each task is created and executed by the host's overdue sweep
 - At deploy/update time an invalid configuration (unknown values, missing required fields, mutually exclusive combinations) is rejected outright with a node-level error message

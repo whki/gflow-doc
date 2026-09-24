@@ -33,8 +33,9 @@
 - 超时（`timeout`）：`dueInMinutes` 截止时长 + `action` 逾期动作（`remind` 提醒 / `autoApprove` 自动通过 / `autoReject` 自动拒绝），相对每个任务创建时刻计时，由平台逾期巡检统一处理
 - 驳回（`reject`）：`strategy` 取 `terminate` 终止流程（缺省）/ `toStarter` 回发起人 / `toPrev` 上一节点 / `toNode` 指定节点（配 `target`）；跳转目标不可达时按节点 Reject/Failure 出边兜底，无出边则终止
 - 自审（`selfApproval`）：审批人恰好是发起人时——`none` 不过滤（缺省）/ `skip` 移除发起人 / `autoApprove` 保留发起人 / `delegateToManager` 转交直接上级 / `delegateToDeptManager` 转交部门负责人
+- 审批人为空兜底（`emptyApproverPolicy`）：解析不到审批人时——`tenant_admin` 转交租户管理员（缺省）/ `auto_approve` 系统按通过办结 / `park` 挂起待指派（管理员在任务监控里直接指派）
 - 字段权限：控制该审批人对表单字段的 可编辑 / 只读 / 隐藏（提交时只读和隐藏字段不会被覆盖）
-- 动作权限：转办、委派、加签、退回、催办等按钮的显隐
+- 动作权限：转办、委派、加签、退回、催办等按钮的显隐；流程级另有收回（`recall`，缺省开启）开关与终态收回窗口（`recallWindowDays`，缺省 7 天）
 
 ### 抄送节点（ccTask）
 
@@ -105,6 +106,7 @@
     "approver": { "type": "user", "userIds": ["480356539643727872"] },
     "approveMode": "single",
     "selfApproval": "none",
+    "emptyApproverPolicy": "tenant_admin",
     "reject": { "strategy": "toStarter" },
     "timeout": { "dueInMinutes": 60, "action": "remind" }
   },
@@ -118,6 +120,7 @@
 - `approver`：审批人，`type` 取 `user` / `role` / `dept` / `manager` / `multiLevelManager` / `initiatorSelect` / `initiatorSelf`，按类型消费 `userIds` / `roleIds` / `deptIds` / `levels`（`manager` 取第 N 级；`multiLevelManager` 正数固定到第 N 级、负数直到最上层）/ `expression`（`initiatorSelect` 填 `${msg.xxx}` 表达式模板，gflow 写 `${msg.selectedUsers}`）
 - `approveMode`：`single`（缺省）/ `any` / `all` / `sequential` / `vote`；`vote` 配 `voteRule`：`{ "type": "majority|percent|count", "value": N }`（percent 取 0~100，count 为票数，majority 不消费 value，缺省按过半）
 - `selfApproval`：`none`（缺省）/ `skip` / `autoApprove` / `delegateToManager` / `delegateToDeptManager`
+- `emptyApproverPolicy`：审批人解析为空集合时的兜底——`tenant_admin`（缺省，转交租户管理员；发起人是唯一管理员时自动通过）/ `auto_approve`（系统按通过办结并留痕）/ `park`（挂起待指派）；任务变量写 `fallback_*` 四件套留痕
 - `reject`：`{ "strategy": "terminate|toStarter|toPrev|toNode", "target": "nodeId" }`，`terminate` 缺省；`toNode` 必填 `target`（链中存在的节点 ID），目标不可达按 Reject/Failure 出边兜底
 - `timeout`：`{ "dueInMinutes": 60, "action": "remind|autoApprove|autoReject" }`，相对每个任务创建时刻计时，由宿主逾期巡检执行
 - 部署/更新时配置非法（未知取值、必填缺失、互斥组合）会被直接拒绝并给出节点级错误信息
