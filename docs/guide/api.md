@@ -71,7 +71,7 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 | POST | `/{id}/delegate` | 委派：`{ "assigneeUserId": "u_lina", "reason": "…" }`，被委派人通过 / 拒绝后任务自动归还原审批人 |
 | POST | `/{id}/resolve` | 归还委派（无请求体）：任务回到原审批人名下，被委派人审批后无需手动调用 |
 | POST | `/{id}/add-sign` | 加签：`{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }` |
-| POST | `/{id}/reduce-sign` | 减签：`{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }`，仅移除未办理的加签/会签人 |
+| POST | `/{id}/reduce-sign` | 减签：`{ "assigneeUserIds": ["u_wangwu"], "reason": "…" }`，仅移除未办理的子任务；加签产生的子任务仅加签人本人可减 |
 | POST | `/{id}/withdraw` | 撤回（申请人撤回已提交的申请，按任务定位实例并终止） |
 | POST | `/{id}/suspend` · `/{id}/activate` | 任务挂起 / 恢复 |
 | POST | `/{id}/complete` | 完成（非审批类任务） |
