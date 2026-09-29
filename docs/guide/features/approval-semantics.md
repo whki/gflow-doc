@@ -170,7 +170,7 @@ flowchart LR
 
 ### 收回
 
-审批人撤销自己最近投出的一票（通过或驳回）重新待审（面向用户的操作说明见[审批动作指南](/guide/features/approval-actions)）。引擎守卫全集：本人最近一票（通过或驳回）、该票非管理员代审产生、无更晚办理记录（同会签轮次的同伴投票除外）、实例仍停泊在 `active`/`pending` 的 userTask 上、收回路径上无自动化节点（沿 Success 出边 BFS，未知节点类型 fail-closed）。收回执行时：自己之后的在途任务归档（`end_reason` 前缀「审批人收回」）、该票标记 `recalled` 并在时间线显示「已收回」、收回人任务重建（沿用父任务 / 审批规则 / 顺序位次，剔除旧 `approved`/`comment` 变量防静默自动通过）。已完结实例支持**终态收回**：限发起人或 workflow admin，须在 `recallWindowDays` 窗口内（缺省 7 天），按原主键复活运行行并重入末节点整轮重审，失败补偿回归档。
+审批人撤销自己最近投出的一票（通过或驳回）重新待审（面向用户的操作说明见[审批动作指南](/guide/features/approval-actions)）。引擎守卫全集：本人最近一票（通过或驳回）、该票非管理员代审产生、无更晚办理记录（同会签轮次的同伴投票除外）、实例仍停泊在 `active`/`pending` 的 userTask 上、收回路径上无自动化节点（沿 Success 出边 BFS，未知节点类型 fail-closed）。收回执行时：自己之后的在途任务归档（`end_reason` 前缀「审批人收回」）、该票标记 `recalled` 并在时间线显示「已收回」、收回人任务重建（沿用父任务 / 审批规则 / 顺序位次，剔除旧 `approved`/`comment` 变量防静默自动通过）。已完结实例的**终态收回**（按原主键复活运行行、重入末节点整轮重审）当前下线：已完成的申请不可逆，需要重来时由发起人重新发起新申请。
 
 ### 撤回
 
@@ -237,7 +237,7 @@ flowchart LR
 
 发起人侧另有 `suspend` / `withdraw` / `terminate` / `resubmit` 等实例级开关。设计器里逐节点可视化配置。
 
-**收回（recall）是流程级开关**，配在 `ruleChain.additionalInfo.actionPermissions`，与上述节点级动作不同层：缺省开启（opt-out），显式置 `false` 才禁用；同层的 `recallWindowDays`（1-365）控制已完结实例终态收回的窗口天数，缺省 7 天。
+**收回（recall）是流程级开关**，配在 `ruleChain.additionalInfo.actionPermissions`，与上述节点级动作不同层：缺省开启（opt-out），显式置 `false` 才禁用。该开关只作用于在途收回；已完结实例终态收回已下线，历史配置键 `recallWindowDays` 不再生效。
 
 ## 部署期校验
 

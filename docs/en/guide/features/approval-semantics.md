@@ -170,7 +170,7 @@ Role/department candidate tasks are first come, first served: anyone in the cand
 
 ### Recall
 
-An approver voids their own latest vote (approval or rejection) and puts it back in their to-do list (user-facing guide in [Approval Actions](/en/guide/features/approval-actions)). The engine guards: own latest vote (approval or rejection), the ticket not produced by an admin proxy audit, no later handling record (ballots from the same countersign round excluded), the instance still parked on an `active`/`pending` userTask, and no automation node on the recall path (BFS along Success edges, fail-closed on unknown node types). On execution: tasks created after the ticket are archived (`end_reason` prefixed "recalled by approver"), the ticket is marked `recalled` (shown as "Recalled" on the timeline), and the recalling user's task is rebuilt (inheriting the parent task / approval rule / sequence position, with stale `approved`/`comment` variables stripped to prevent silent auto-approval). Completed instances support **terminal recall**: initiator or workflow admin only, within the `recallWindowDays` window (7 days by default); the runtime row is revived under its original primary key and the last node re-runs a full review round, with compensating re-archive on failure.
+An approver voids their own latest vote (approval or rejection) and puts it back in their to-do list (user-facing guide in [Approval Actions](/en/guide/features/approval-actions)). The engine guards: own latest vote (approval or rejection), the ticket not produced by an admin proxy audit, no later handling record (ballots from the same countersign round excluded), the instance still parked on an `active`/`pending` userTask, and no automation node on the recall path (BFS along Success edges, fail-closed on unknown node types). On execution: tasks created after the ticket are archived (`end_reason` prefixed "recalled by approver"), the ticket is marked `recalled` (shown as "Recalled" on the timeline), and the recalling user's task is rebuilt (inheriting the parent task / approval rule / sequence position, with stale `approved`/`comment` variables stripped to prevent silent auto-approval). **Terminal recall** for completed instances (reviving the runtime row under its original primary key and re-running the last node) is currently disabled: completed applications are irreversible, and starting over means the initiator submits a new application.
 
 ### Withdraw
 
@@ -237,7 +237,7 @@ Each `userTask` can finely toggle the actions available to its approver via `add
 
 On the initiator side there are additional instance-level switches such as `suspend` / `withdraw` / `terminate` / `resubmit`. All of these are configured visually, node by node, in the Process Designer.
 
-**Recall is a flow-level switch**, configured in `ruleChain.additionalInfo.actionPermissions` — a different layer from the per-node actions above: enabled by default (opt-out), only an explicit `false` disables it; `recallWindowDays` (1-365) on the same level controls the terminal-recall window for completed instances, defaulting to 7 days.
+**Recall is a flow-level switch**, configured in `ruleChain.additionalInfo.actionPermissions` — a different layer from the per-node actions above: enabled by default (opt-out), only an explicit `false` disables it. The switch only governs in-flight recall; terminal recall for completed instances is currently disabled, and the legacy `recallWindowDays` key no longer takes effect.
 
 ## Deploy-Time Validation
 

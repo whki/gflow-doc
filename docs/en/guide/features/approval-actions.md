@@ -71,14 +71,13 @@ The approver's version of second thoughts: recall your own latest vote (approval
 
 - Your latest vote (approval or rejection) is in and the downstream node has not been handled yet (a task still pending for claim counts as "not handled")
 - In sequential approval you were the last signer of the round and nobody has acted after you; in countersign / vote modes, ballots cast by peers in the same round do not block you from recalling your own vote — the real blocker is a handling record on a **different node** after you
-- Completed applications: the initiator or an admin can recall the whole instance within the recall window (default 7 days, adjustable per flow in the designer's advanced settings, 1-365 days); the last node reopens for re-review and the instance re-archives afterwards
 
 **You cannot recall when**:
 
 - Someone has already handled a later node after your ticket (a later handling record exists)
 - The ticket was produced by an admin proxy audit and cannot be recalled — raise the issue with the administrator
 - An automation action has run after your approval (HTTP calls, automation nodes — effects that cannot be safely rolled back)
-- The instance is suspended, or a completed application is past its recall window
+- The instance is suspended, or the application has completed (completed applications cannot be recalled; to start over, the initiator submits a new application)
 - Only your own tickets can be recalled; flows that explicitly disable "Recall" in the designer (enabled by default)
 
 ## Admin Proxy Audit
