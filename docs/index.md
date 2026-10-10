@@ -21,6 +21,7 @@ import { onMounted } from 'vue'
 </script>
 
 <HomeHero />
+<HomeDemo />
 <HomeRepos />
 <HomeCapabilities />
 <HomeProducts />

@@ -94,7 +94,7 @@ const cur = computed(() => T.value.slides[idx.value])
   <section class="home-section paper-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 04 · Screenshots"
+        eyebrow="Section 05 · Screenshots"
         :title="T.head.title"
         :desc="T.head.desc"
       />

@@ -3,6 +3,7 @@ import type { Theme } from 'vitepress'
 import './custom.css'
 
 import Layout from './Layout.vue'
+import HomeDemo from './components/HomeDemo.vue'
 import HomeHero from './components/HomeHero.vue'
 import HomeRepos from './components/HomeRepos.vue'
 import HomeCapabilities from './components/HomeCapabilities.vue'
@@ -25,6 +26,7 @@ export default {
   extends: DefaultTheme,
   Layout,
   enhanceApp({ app }) {
+    app.component('HomeDemo', HomeDemo)
     app.component('HomeHero', HomeHero)
     app.component('HomeRepos', HomeRepos)
     app.component('HomeCapabilities', HomeCapabilities)

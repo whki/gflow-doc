@@ -180,7 +180,7 @@ const head = computed(() =>
   <section class="home-section paper-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 01 · Capabilities"
+        eyebrow="Section 02 · Capabilities"
         :title="head.title"
         :desc="head.desc"
       />

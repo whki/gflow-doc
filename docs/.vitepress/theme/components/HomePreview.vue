@@ -34,7 +34,7 @@ const T = computed(() =>
   <section class="home-section dark-section">
     <div class="home-inner">
       <SectionHead
-        eyebrow="Section 03 · Designer"
+        eyebrow="Section 04 · Designer"
         :title="T.head.title"
         :desc="T.head.desc"
       />
