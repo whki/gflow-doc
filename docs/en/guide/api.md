@@ -57,7 +57,7 @@ Approval action endpoints (claim / approve / reject / transfer / delegate / add-
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | Query tasks (conditions such as assignee / status / due date) |
+| GET | `/` | Query tasks (conditions such as assignee / instanceStatus / queryHistory / dueDateBefore) |
 | GET | `/{id}` | Task details |
 | GET | `/statistics` | Approval statistics (todo badge, etc.) |
 | GET | `/overdue` · `/backlog` | Overdue tasks / backlog-by-process dashboard (admin monitoring) |
@@ -100,9 +100,9 @@ curl -X POST http://localhost:8080/api/v1/workflow/process-instances/start \
 ## Example: An Approver Handles a To-do
 
 ```bash
-# Query my to-dos
+# Query my to-dos (data.items[] carries each instance plus currentUserTaskId, the task ID used below)
 curl -H "Authorization: Bearer $TOKEN2" \
-  "http://localhost:8080/api/v1/workflow/tasks?assignee=u_zhangwei&status=pending,active"
+  "http://localhost:8080/api/v1/workflow/process-instances/todo?page=1&pageSize=50"
 
 # Approve
 curl -X POST http://localhost:8080/api/v1/workflow/tasks/{taskId}/approve \

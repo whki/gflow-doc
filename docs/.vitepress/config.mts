@@ -92,6 +92,15 @@ export default withMermaid(defineConfig({
             }
           ],
 
+          '/guide/integration/': [
+            {
+              text: '集成对接',
+              items: [
+                { text: '外部系统对接指南', link: '/guide/integration/api-integration' },
+              ]
+            }
+          ],
+
           '/guide/data-model/': [
             {
               text: '数据模型',
@@ -233,6 +242,15 @@ export default withMermaid(defineConfig({
                 { text: 'AI Agent (AI Approval)', link: '/en/guide/features/ai-approval' },
                 { text: 'Automation', link: '/en/guide/features/automation' },
                 { text: 'IM Work Notifications', link: '/en/guide/features/im-notify' },
+              ]
+            }
+          ],
+
+          '/en/guide/integration/': [
+            {
+              text: 'Integration',
+              items: [
+                { text: 'External System Integration', link: '/en/guide/integration/api-integration' },
               ]
             }
           ],

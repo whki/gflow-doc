@@ -96,7 +96,7 @@ DingTalk or Feishu is the quickest start (about 5–8 minutes each, no domain ne
 
 ### Step 2: enter credentials in GFlow
 
-Sign in to GFlow → **System Management → IM Integration** → the "Identity integration" card → the "IM platforms (pick one of three)" group → click **Configure** on an unconfigured platform card (or Edit on a configured one), fill in per the table below and save.
+Sign in to GFlow → **System Management → Integration Configuration** → the "Identity integration" card → the "IM platforms (pick one of three)" group → click **Configure** on an unconfigured platform card (or Edit on a configured one), fill in per the table below and save.
 
 <img src="/screenshots/im-config.png" alt="Identity integration page: pick one of three IM platforms" style="max-width:100%;border-radius:6px" />
 
@@ -236,6 +236,6 @@ Bindings created by this sync are immediately usable by **JWT mutual trust** log
 
 ## Issue logins from your own system (optional)
 
-Beyond IM login-free access, your own systems can use **JWT mutual trust**: sign a short-lived JWT with an RS256 private key (sub = user ID, aud = gflow, TTL ≤ 5 minutes), and gflow verifies it with the public key entered on the "SSO JWT Trust" card. The endpoint is `POST /api/v1/auth/exchange/trusted`.
+Beyond IM login-free access, your own systems can use **JWT mutual trust**: sign a short-lived JWT with an RS256 private key (sub = user ID, aud = gflow, TTL ≤ 5 minutes), and gflow verifies it with the public key entered on the "SSO JWT Trust" card. The endpoint is `POST /api/v1/auth/exchange/trusted`, request body `{"external_jwt": "<your signed JWT>"}`.
 
 Binding precedence: an explicit `user_bindings` row (provider = `jwt-trust`) wins; without one, gflow falls back to the binding created by the generic directory source sync — combined with the previous section, a customer system only needs the snapshot endpoint plus the public key, and org chart, account bindings and login all come together automatically.

@@ -96,7 +96,7 @@ flowchart LR
 
 ### 第 2 步：把凭证录入 GFlow
 
-登录 GFlow → **系统管理 → IM 集成** → 「身份集成」卡 → 「IM 平台（三选一）」组 → 在未配置的平台卡片上点「**配置**」（已配置的卡片点「编辑」），在抽屉里按下表填写后保存。
+登录 GFlow → **系统管理 → 集成配置** → 「身份集成」卡 → 「IM 平台（三选一）」组 → 在未配置的平台卡片上点「**配置**」（已配置的卡片点「编辑」），在抽屉里按下表填写后保存。
 
 <img src="/screenshots/im-config.png" alt="身份集成管理页：IM 平台三选一卡片" style="max-width:100%;border-radius:6px" />
 
@@ -236,6 +236,10 @@ Authorization: Bearer <token>
 
 ## 给第三方系统签发登录（可选）
 
-除 IM 免登外，自有系统可用 **JWT 互信**方式让已登录用户直达 gflow：客户系统用 RS256 私钥签发短期 JWT（sub = 用户 ID、aud = gflow、有效期 ≤ 5 分钟），gflow 以「SSO JWT 互信」卡片录入的公钥验签后换发登录态，接口为 `POST /api/v1/auth/exchange/trusted`。
+除 IM 免登外，自有系统可用 **JWT 互信**方式让已登录用户直达 gflow：客户系统用 RS256 私钥签发短期 JWT（sub = 用户 ID、aud = gflow、有效期 ≤ 5 分钟），gflow 以「SSO JWT 互信」卡片录入的公钥验签后换发登录态，接口为 `POST /api/v1/auth/exchange/trusted`，请求体 `{"external_jwt": "<客户系统签发的JWT>"}`。
 
 绑定优先级：显式导入的 `user_bindings`（provider = `jwt-trust`）优先；没有时回退通用身份源同步建好的绑定——配合上一节，客户系统只需配好通讯录同步接口 + 录入公钥，组织架构、账号绑定、免登全部自动就绪。
+
+无人值守的服务间集成用 **API-Key**（`gk_` 前缀服务账号凭证，换发 token、专用角色限权）见[外部系统对接指南](/guide/integration/api-integration)。
+
+审批终态等事件的 **Webhook 出站推送**（事件订阅、HMAC 签名校验、按 EventId 幂等去重）同样见[外部系统对接指南](/guide/integration/api-integration)。

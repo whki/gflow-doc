@@ -10,6 +10,17 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 
 审批动作类接口（签收 / 通过 / 驳回 / 转办 / 委派 / 加减签等）要求 `approval:operate` 权限；发起实例要求 `workflow:instance:start` 或 `approval:create`（任一即可）；管理类接口各有独立权限码。
 
+### 令牌端点 `/api/v1/auth`
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/login` | 账密登录（`{username, password}`，验证码字段可选）→ `data.token` / `data.refreshToken` |
+| POST | `/refresh` | 刷新 token（旧 token 放 Authorization 头，过期后宽限期内仍可换新）→ `data.token` |
+| POST | `/exchange/api-key` | **API-Key 换发**：body `{"apiKey": "gk_…"}` → `data.token`，服务账号专用（见[外部系统对接指南](/guide/integration/api-integration)） |
+| POST | `/exchange` · `/exchange/:provider` · `/exchange/trusted` | 一次性票据 / IM 容器 / SSO JWT 互信免登换发（`exchange/trusted` 请求体 `{"external_jwt": "<客户系统签发的JWT>"}`；见[IM 工作通知与免登审批](/guide/features/im-notify)） |
+
+外部系统对接的完整链路（认证选型、发起幂等、webhook 终态推送、OpenAPI 客户端生成）见[外部系统对接指南](/guide/integration/api-integration)。
+
 ## 流程定义 `/api/v1/workflow/process-definitions`
 
 | 方法 | 路径 | 说明 |
@@ -35,7 +46,7 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 |---|---|---|
 | GET | `/` | 分页查询（运行表与归档表自动合并返回） |
 | GET | `/{id}` | 实例详情（含审批时间线与后续审批节点预测 `upcoming`） |
-| POST | `/start` | **发起实例**（processKey + businessKey + variables；返回 `data.instanceId`） |
+| POST | `/start` | **发起实例**（processKey + businessKey + variables；返回 `data.instanceId` 与 `data.duplicated`）——同流程同 businessKey 重复发起幂等返回既有实例（`duplicated: true`），跨流程撞 businessKey 返回 409 |
 | POST | `/{id}/submit-draft` | **提交草稿**（仅 draft 实例可提交；创建者/发起人范围由引擎强校验，权限 `workflow:instance:start` 或 `approval:create`） |
 | POST | `/{id}/suspend` · `/{id}/activate` | 挂起 / 恢复 |
 | POST | `/{id}/force-resume` | 强制恢复（管理员兜底：并行分支卡死救援） |
@@ -44,6 +55,7 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 | POST | `/{id}/terminate` | 终止 |
 | POST | `/{id}/complete` | 完成 |
 | POST | `/{id}/withdraw` | 发起人撤回（实例终止，end_reason 记「申请人撤回」） |
+| POST | `/{id}/recall` | 收回审批：`{ "reason": "…" }`，审批人撤销自己最近投出的一票、后续无人办理时整单回到自己重新待审（语义见[审批动作指南](/guide/features/approval-actions)） |
 | DELETE | `/{id}` · `/batch` | 删除 / 批量删除 |
 | GET | `/{id}/variables` | 流程变量列表 |
 | GET | `/{id}/variables/{variableName}` | 查单个流程变量 |
@@ -57,7 +69,7 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/` | 任务查询（assignee / status / 到期等条件） |
+| GET | `/` | 任务查询（assignee / instanceStatus / queryHistory / dueDateBefore 等条件） |
 | GET | `/{id}` | 任务详情 |
 | GET | `/statistics` | 审批统计（待办徽章等） |
 | GET | `/overdue` · `/backlog` | 超时任务 / 按流程积压看板（管理员监控） |
@@ -76,6 +88,8 @@ JWT Bearer Token（`Authorization: Bearer <token>`），登录接口换取。所
 | POST | `/{id}/suspend` · `/{id}/activate` | 任务挂起 / 恢复 |
 | POST | `/{id}/complete` | 完成（非审批类任务） |
 | POST | `/{id}/reassign` | 任务重分配（管理员） |
+| POST | `/{id}/assignee` | 直接指派：`{ "userId": "u_lina", "reason": "…" }`，面向待签收任务（指派后转办理中）；办理中任务走重分配（权限 `workflow:task:reassign`） |
+| POST | `/{id}/proxy-approve` · `/{id}/proxy-reject` | 管理员代审通过 / 驳回：`{ "comment": "…" }`（comment 必填，票记原办理人名下，权限 `workflow:task:proxy`） |
 | DELETE | `/{id}` | 删除任务 |
 | GET/POST | `/{id}/candidates` | 候选人列表 / 添加候选人（管理员） |
 | POST | `/{id}/candidates/remove` | 移除候选人 |
@@ -100,9 +114,9 @@ curl -X POST http://localhost:8080/api/v1/workflow/process-instances/start \
 ## 示例：审批人处理待办
 
 ```bash
-# 查我的待办
+# 查我的待办（data.items[] 每项含实例与 currentUserTaskId，taskId 即下方审批动作所用）
 curl -H "Authorization: Bearer $TOKEN2" \
-  "http://localhost:8080/api/v1/workflow/tasks?assignee=u_zhangwei&status=pending,active"
+  "http://localhost:8080/api/v1/workflow/process-instances/todo?page=1&pageSize=50"
 
 # 通过
 curl -X POST http://localhost:8080/api/v1/workflow/tasks/{taskId}/approve \
