@@ -82,8 +82,8 @@ curl -X POST http://localhost:8080/api/v1/auth/exchange/api-key \
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/api/v1/integrations/api-keys` | 列表（只显前缀与绑定用户，不回明文） |
-| POST | `/api/v1/integrations/api-keys` | 创建（body：`name` / `userId`；**响应返回完整 key，仅此一次**） |
-| PUT | `/api/v1/integrations/api-keys/{id}` | 启停 / 改名 |
+| POST | `/api/v1/integrations/api-keys` | 创建（body：`name` / `userId` / `expiresAt?`；**响应返回完整 key，仅此一次**。建议设置 `expiresAt` 有效期，到期自动失效） |
+| PUT | `/api/v1/integrations/api-keys/{id}` | 启停 / 改名 / 调整有效期（停用后已换发的 token 也立即失效） |
 | DELETE | `/api/v1/integrations/api-keys/{id}` | 删除 |
 
 ## 发起与幂等
@@ -105,9 +105,9 @@ curl -X POST http://localhost:8080/api/v1/workflow/process-instances/start \
 | 场景 | 结果 |
 | --- | --- |
 | 同流程定义 + 同 `businessKey` 再次发起 | **HTTP 200 幂等返回**：`instanceId` 与首次相同、`duplicated: true`，不产生新实例 |
-| 不同流程定义撞同一 `businessKey` | **HTTP 409**：businessKey 在同租户内被另一流程的进行中实例占用，属于配置错误，明确报错而非静默吞并 |
+| 不同流程定义撞同一 `businessKey` | **HTTP 409**：businessKey 在同租户内被另一流程的在途实例占用，属于配置错误，明确报错而非静默吞并 |
 | `businessKey` 留空 | 系统自动生成，天然唯一，不参与幂等 |
-| 实例到达终态（通过 / 终止 / 撤回…） | `businessKey` 随归档释放，同一单号可重新发起新实例 |
+| 实例到达终态（通过 / 终止 / 拒绝 / 撤回…） | **终态宽限窗口内**（默认 24 小时，可配）同 `businessKey` 再次发起仍幂等返回既有终态实例（`instanceStatus` 携带其终态），防止外部系统延迟重试开出第二张审批单；窗口过后 `businessKey` 随归档释放，同一单号可发起新实例 |
 
 **代员工发起（`startUserId`）**——外部系统代替员工提单的标准姿势：员工在你的系统里提交单据，你的后端用服务账号 key 发起时带上 `startUserId`（该员工在 GFlow 里的用户 ID）：
 
@@ -235,22 +235,26 @@ curl -H "Authorization: Bearer $TOKEN" \
 | --- | --- |
 | `X-GFlow-Event` | 事件类型（同载荷 `event`） |
 | `X-GFlow-EventId` | 事件唯一 ID——**消费方按它幂等去重** |
-| `X-GFlow-Timestamp` | 推送时间戳（Unix 秒） |
-| `X-GFlow-Signature` | `sha256=` + `hex(HMAC-SHA256(secret, 原始请求体))` |
+| `X-GFlow-Timestamp` | 推送时间戳（Unix 秒，**参与签名**） |
+| `X-GFlow-Signature` | `sha256=` + `hex(HMAC-SHA256(secret, timestamp + "." + 原始请求体))` |
 
-**签名校验（消费方必做）**：对**原始请求体字节**（不要先解析再序列化）重算 HMAC 比对，比较用常数时间比较：
+**签名校验（消费方必做）**：对**时间戳头 + "." + 原始请求体字节**（不要先解析再序列化）重算 HMAC 比对，比较用常数时间比较；时间戳在签名面内，篡改即验签失败，建议同时校验与当前时差在 5 分钟内（防过期重放）：
 
 ```text
-expected = "sha256=" + lowercase(hex(HMAC_SHA256(secret, raw_body)))
+ts = headers["X-GFlow-Timestamp"]
+if abs(now() - ts) > 300: return 401          # 时间戳超出 ±5 分钟容差，拒绝（防重放）
+base = ts + "." + raw_body                     # 原始请求体字节，不要先解析再序列化
+expected = "sha256=" + lowercase(hex(HMAC_SHA256(secret, base)))
 if not constant_time_eq(expected, headers["X-GFlow-Signature"]):
     return 401   # 签名不符，拒绝处理
 ```
 
 **投递语义**：
 
-- **at-least-once**：投递失败自动重试，最多 3 次，由后台任务驱动，不阻塞审批主链路；
+- **at-least-once**：投递失败自动重试，最多 3 次，由后台任务驱动，不阻塞审批主链路；4xx 永久错误（404/403 等，除 408/429）不重试直接终态化；
 - 因此消费方必须**按 `X-GFlow-EventId`（或载荷 `eventId`）幂等去重**——收到重复事件是正常情况，处理一次即可；
-- 回调 URL 仅接受 `http` / `https` 的公网地址（环回、内网地址会被拒绝），确保 secret 校验前不暴露攻击面。
+- 每次投递的对端响应码与失败原因留存在投递日志中，重试耗尽的失败行可在管理页「投递记录」按原文手动重发；
+- 回调 URL 仅接受 `http` / `https` 且解析到公网 IP 的地址（环回、内网地址与解析到内网的域名会被拒绝），拨号时还会按实际连接 IP 二次校验。
 
 **管理 API**（权限 `system:config:list` / `system:config:edit`）：
 
@@ -260,6 +264,9 @@ if not constant_time_eq(expected, headers["X-GFlow-Signature"]):
 | PUT | `/api/v1/integrations/webhooks/{name}` | 创建 / 更新（URL、secret、事件集、启停） |
 | DELETE | `/api/v1/integrations/webhooks/{name}` | 删除 |
 | POST | `/api/v1/integrations/webhooks/{name}/test` | 发一条 `test` 测试事件，验证连通与签名链路 |
+| GET | `/api/v1/integrations/webhook-deliveries` | 投递日志（按端点/状态过滤，含对端响应码与失败原因） |
+| GET | `/api/v1/integrations/webhook-deliveries/{id}` | 单条投递详情（含推送载荷原文） |
+| POST | `/api/v1/integrations/webhook-deliveries/{id}/redeliver` | 手动重发一次（失败/死信行的人工补偿通道） |
 
 创建与更新走同一路径（按 `{name}` 是否已存在区分），细则：
 
@@ -279,7 +286,7 @@ if not constant_time_eq(expected, headers["X-GFlow-Signature"]):
 | `429` 登录 / 换发被限流 | 账密或 API-Key 连续错误 5 次触发锁定（15 分钟），稍后再试或联系管理员 |
 | `403` 权限不足 | 服务账号专用角色漏配权限码：发起要 `workflow:instance:start`，审批动作要 `approval:operate`，查实例 / 待办要 `workflow:instance:view`（`/todo` 端点亦可用 `approval:todo`） |
 | `409` 发起冲突 | 同 `businessKey` 被另一流程定义的进行中实例占用：换单号，或确认该单应走哪个流程 |
-| webhook 收不到推送 | 确认端点已启用且勾选了对应事件；URL 为公网地址；先调 `/{name}/test` 验证连通；投递失败有重试，超限后可在管理页核对 |
+| webhook 收不到推送 | 确认端点已启用且勾选了对应事件；URL 为解析到公网 IP 的地址；先调 `/{name}/test` 验证连通；投递失败有重试，重试耗尽的失败行在管理页「投递记录」可查并手动重发 |
 | webhook 签名校验不过 | 校验对象必须是**原始请求体字节**（解析再序列化会改变字节序列导致验签失败）；secret 与端点配置一致 |
 
 ## OpenAPI 客户端生成

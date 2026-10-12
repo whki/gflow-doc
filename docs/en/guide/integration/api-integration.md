@@ -56,7 +56,7 @@ curl -X POST http://localhost:8080/api/v1/workflow/process-instances/start \
 | Same process + same `businessKey` sent again | **HTTP 200 idempotent return**: same `instanceId`, `duplicated: true` — no second instance |
 | Same `businessKey` claimed by a different process definition | **HTTP 409** |
 | Empty `businessKey` | Auto-generated, not part of idempotency |
-| Instance reached a terminal state | `businessKey` is released with archiving; the same number can start a new instance |
+| Instance reached a terminal state | Within the terminal grace window (24h by default, configurable) the same `businessKey` still idempotently returns the archived instance (`instanceStatus` carries its terminal state), preventing delayed retries from opening a second approval; after the window the key is released for new instances |
 
 **Starting on behalf of an employee (`startUserId`)** — the standard pattern when the employee submits the form in *your* system and your backend starts the GFlow instance: pass the employee's GFlow user ID as `startUserId`. The instance's initiator becomes that employee — approval chains such as "the initiator's direct manager" route correctly, and the timeline / CC / my-applications all land under their name. The service account is only the actor. Requires `workflow:instance:start` on the service account's role, and the target user must exist in the same tenant and be enabled. Omit `startUserId` to start as the service account itself (for document-type flows unrelated to any person).
 
@@ -104,16 +104,19 @@ Configure under System → Integration Configuration → Webhooks (a platform-le
 
 - Events: `instance.completed`, `instance.terminated` (status distinguishes `terminated` / `cancelled` / `failed`), `task.assigned`.
 - Payload: `{event, eventId, tenantId, instanceId, businessKey, processKey, processName, status, operator, reason, occurredAt}`. Four conditional fields ride along by event type: `source` (only on `instance.terminated`, distinguishes `api` / `withdraw` / `reject`, may be empty) and `taskId` / `taskName` / `assignees` (only on `task.assigned`; `taskId` is the task ID approval actions use). `eventId` is a bare UUID — identify events by the `event` field, not by any prefix (only the management-page `test` event uses the `evt-test-` prefix).
-- Headers: `X-GFlow-Event`, `X-GFlow-EventId` (**deduplicate by this**), `X-GFlow-Timestamp` (Unix seconds), `X-GFlow-Signature: sha256=<hex(HMAC-SHA256(secret, rawBody))>`.
+- Headers: `X-GFlow-Event`, `X-GFlow-EventId` (**deduplicate by this**), `X-GFlow-Timestamp` (Unix seconds, **included in the signature**), `X-GFlow-Signature: sha256=<hex(HMAC-SHA256(secret, timestamp + "." + rawBody))>`.
 
-Verify the signature over the **raw request body bytes**:
+Verify the signature over **timestamp + "." + raw request body bytes** (the timestamp header is part of the signed base string — tampering with it breaks verification; rejecting timestamps more than ±5 minutes old is the recommended replay protection):
 
 ```text
-expected = "sha256=" + lowercase(hex(HMAC_SHA256(secret, raw_body)))
+ts = headers["X-GFlow-Timestamp"]
+if abs(now() - ts) > 300: reject
+base = ts + "." + raw_body
+expected = "sha256=" + lowercase(hex(HMAC_SHA256(secret, base)))
 if not constant_time_eq(expected, headers["X-GFlow-Signature"]): reject
 ```
 
-Delivery is **at-least-once**: failed pushes retry automatically (up to 3 times) without blocking the approval chain, so consumers must deduplicate by `eventId`. Callback URLs must be public `http`/`https` addresses. Management APIs: `GET /api/v1/integrations/webhooks`, `PUT /api/v1/integrations/webhooks/{name}` (create/update; body `{url, events[], enabled, secret}`, secret omitted on update keeps the current value, required and ≥16 chars on create, endpoint name ≤32 chars), `DELETE /api/v1/integrations/webhooks/{name}`, and `POST /api/v1/integrations/webhooks/{name}/test` (sends a `test` event).
+Delivery is **at-least-once**: failed pushes retry automatically (up to 3 times; permanent 4xx errors other than 408/429 terminalize immediately) without blocking the approval chain, so consumers must deduplicate by `eventId`. Every attempt's response code and failure reason is retained in the delivery log; exhausted rows can be manually redelivered from the management page. Callback URLs must be `http`/`https` addresses resolving to public IPs (dial-time re-validation included). Management APIs: `GET /api/v1/integrations/webhooks`, `PUT /api/v1/integrations/webhooks/{name}` (create/update; body `{url, events[], enabled, secret}`, secret omitted on update keeps the current value, required and ≥16 chars on create, endpoint name ≤32 chars), `DELETE /api/v1/integrations/webhooks/{name}`, `POST /api/v1/integrations/webhooks/{name}/test` (sends a `test` event), `GET /api/v1/integrations/webhook-deliveries` (paged delivery log), `GET /api/v1/integrations/webhook-deliveries/{id}` (delivery detail incl. payload), and `POST /api/v1/integrations/webhook-deliveries/{id}/redeliver` (manual replay).
 
 ## Errors
 
@@ -122,7 +125,7 @@ Delivery is **at-least-once**: failed pushes retry automatically (up to 3 times)
 | `401` expired token | Refresh via `POST /api/v1/auth/refresh`, or re-exchange an API-Key token |
 | `403` forbidden | Check the service account's role permission codes (`workflow:instance:start` / `approval:operate` / `workflow:instance:view`) |
 | `409` on start | `businessKey` is held by an in-flight instance of a different process — use a new number |
-| Webhook signature fails | You must HMAC the raw body bytes, not a re-serialized JSON |
+| Webhook signature fails | You must HMAC timestamp + "." + raw body bytes (see the verification snippet), not a re-serialized JSON |
 
 ## OpenAPI Client Generation
 
