@@ -30,11 +30,11 @@ psql -d gflow -f scripts/00.init_bpm_pg.sql
 **MySQL:**
 
 ```bash
-mysql -u root -p -e "CREATE DATABASE gflow"
-mysql -u root -p gflow < scripts/00.init_bpm_mysql.sql
+mysql -u root -p -e "CREATE DATABASE gflow DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql --default-character-set=utf8mb4 -u root -p gflow < scripts/00.init_bpm_mysql.sql
 ```
 
-> The initialization scripts are idempotent (`CREATE TABLE IF NOT EXISTS`): re-running them only creates missing tables and never touches existing tables or data. To reset, recreate the database.
+> The initialization scripts are idempotent (`CREATE TABLE IF NOT EXISTS`): re-running them only creates missing tables and never touches existing tables or data. To reset, recreate the database. They also run `SET NAMES utf8mb4` internally; pass `--default-character-set=utf8mb4` on manual imports to keep the client charset consistent.
 
 Tables created: `wf_process` (process definitions), `wf_instance` / `wf_hi_instance` (instance runtime/history), `wf_task` / `wf_hi_task` (task runtime/history), `wf_task_assignee` (candidate pool), `wf_task_comment` (approval comments). See the [Data Model](/en/guide/data-model/) for what each table does.
 

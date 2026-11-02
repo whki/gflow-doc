@@ -48,8 +48,8 @@ System tables for users, roles, departments, positions, and so on **are the host
 # Engine repository (PostgreSQL / MySQL)
 createdb gflow
 psql -d gflow -f gflow-engine/scripts/00.init_bpm_pg.sql
-mysql -u root -p -e "CREATE DATABASE gflow"
-mysql -u root -p gflow < gflow-engine/scripts/00.init_bpm_mysql.sql
+mysql -u root -p -e "CREATE DATABASE gflow DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql --default-character-set=utf8mb4 -u root -p gflow < gflow-engine/scripts/00.init_bpm_mysql.sql
 
 # GFlow Platform (PostgreSQL: first the 7 engine tables, then the host tables + seed data — run both)
 psql -d gflow -f gflow/scripts/engine/00.init_bpm_pg.sql

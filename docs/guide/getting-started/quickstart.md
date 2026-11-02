@@ -30,11 +30,11 @@ psql -d gflow -f scripts/00.init_bpm_pg.sql
 **MySQL：**
 
 ```bash
-mysql -u root -p -e "CREATE DATABASE gflow"
-mysql -u root -p gflow < scripts/00.init_bpm_mysql.sql
+mysql -u root -p -e "CREATE DATABASE gflow DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql --default-character-set=utf8mb4 -u root -p gflow < scripts/00.init_bpm_mysql.sql
 ```
 
-> 初始化脚本是幂等的（`CREATE TABLE IF NOT EXISTS`）：重复执行只补建缺失的表，不会改动已有表和数据；需要重置时请重建数据库。
+> 初始化脚本是幂等的（`CREATE TABLE IF NOT EXISTS`）：重复执行只补建缺失的表，不会改动已有表和数据；需要重置时请重建数据库。脚本已内置 `SET NAMES utf8mb4`；手工导入建议带上 `--default-character-set=utf8mb4`，保持客户端与会话字符集一致。
 
 建表清单：`wf_process`（流程定义）、`wf_instance` / `wf_hi_instance`（实例运行时/历史）、`wf_task` / `wf_hi_task`（任务运行时/历史）、`wf_task_assignee`（候选人池）、`wf_task_comment`（审批意见表）。每张表的作用见[数据模型](/guide/data-model/)。
 

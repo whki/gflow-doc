@@ -94,8 +94,8 @@ erDiagram
 # 引擎仓库（PostgreSQL / MySQL）
 createdb gflow
 psql -d gflow -f gflow-engine/scripts/00.init_bpm_pg.sql
-mysql -u root -p -e "CREATE DATABASE gflow"
-mysql -u root -p gflow < gflow-engine/scripts/00.init_bpm_mysql.sql
+mysql -u root -p -e "CREATE DATABASE gflow DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql --default-character-set=utf8mb4 -u root -p gflow < gflow-engine/scripts/00.init_bpm_mysql.sql
 
 # GFlow Platform（PostgreSQL：先引擎 7 张表，再宿主表 + 种子数据，两条都执行）
 psql -d gflow -f gflow/scripts/engine/00.init_bpm_pg.sql
