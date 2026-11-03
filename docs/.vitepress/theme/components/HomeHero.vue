@@ -10,7 +10,7 @@ const { isEn, link } = useI18n()
 const T = computed(() =>
   isEn.value
     ? {
-        announce: 'GFlow v1.2.0 released — approval config rework · upcoming approver preview · mobile web app',
+        announce: 'GFlow v1.4.1 released — full transition audit trail · IM notifications · open integrations',
         titleA: 'AI pre-screens · Humans approve ·',
         titleB: 'automation follows.',
         subtitle: 'GFlow Workflow Platform',
@@ -45,7 +45,7 @@ const T = computed(() =>
         ],
       }
     : {
-        announce: 'GFlow v1.2.0 发布：审批配置重构 · 后续审批人预测 · 移动端 H5',
+        announce: 'GFlow v1.4.1 发布：流转全程留痕 · IM 消息直达 · 开放外部系统集成',
         titleA: 'AI 先审 · 人再签 ·',
         titleB: '签完自动办。',
         subtitle: 'GFlow 极风工作流平台',
