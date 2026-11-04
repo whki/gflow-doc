@@ -98,7 +98,7 @@ flowchart LR
 
 登录 GFlow → **系统管理 → 集成配置** → 「身份集成」卡 → 「IM 平台（三选一）」组 → 在未配置的平台卡片上点「**配置**」（已配置的卡片点「编辑」），在抽屉里按下表填写后保存。
 
-<img src="/screenshots/im-config.png" alt="身份集成管理页：IM 平台三选一卡片" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-config.webp" alt="身份集成管理页：IM 平台三选一卡片" style="max-width:100%;border-radius:6px" />
 
 | gflow 字段 | 钉钉 | 企业微信 | 飞书 |
 | --- | --- | --- | --- |
@@ -140,7 +140,7 @@ flowchart LR
 
 绑定关系的查看与解绑：系统管理 → 组织架构 → 对应用户「更多 → IM绑定」，可查看绑定状态并解绑。解绑后该用户不再收到对应平台的工作通知，重跑同步或经免登登录会自动补绑。
 
-<img src="/screenshots/im-bindings.png" alt="用户 IM 绑定管理" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-bindings.webp" alt="用户 IM 绑定管理" style="max-width:100%;border-radius:6px" />
 
 「自有系统集成」组里的「通用身份源」卡片用于对接自建账号体系，见[下文](#对接自有系统通用身份源可选)。
 
@@ -156,7 +156,7 @@ flowchart LR
 | 企业微信内点卡片 | 静默授权，无感进入（需在企微后台配置备案的可信域名） |
 | 飞书 / 浏览器 / 其他 | 链接内一次性票据免登，三个平台通用 |
 
-<img src="/screenshots/im-landing.png" alt="免登落地审批详情" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-landing.webp" alt="免登落地审批详情" style="max-width:100%;border-radius:6px" />
 
 落地后按设备自动分流：手机进移动版详情页，电脑进桌面版。**审批动作必须在系统页面内完成**——卡片上只放「去处理」，不存在消息里直接批的口子，每一步操作都有审计归属。
 

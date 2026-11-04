@@ -98,7 +98,7 @@ DingTalk or Feishu is the quickest start (about 5–8 minutes each, no domain ne
 
 Sign in to GFlow → **System Management → Integration Configuration** → the "Identity integration" card → the "IM platforms (pick one of three)" group → click **Configure** on an unconfigured platform card (or Edit on a configured one), fill in per the table below and save.
 
-<img src="/screenshots/im-config.png" alt="Identity integration page: pick one of three IM platforms" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-config.webp" alt="Identity integration page: pick one of three IM platforms" style="max-width:100%;border-radius:6px" />
 
 | gflow field | DingTalk | WeCom | Feishu |
 | --- | --- | --- | --- |
@@ -140,7 +140,7 @@ On the active platform card (the green "Active" one), click **Sync now**; the su
 
 Binding management: System Management → Organization → a user's "More → IM bindings" shows the binding status and allows unbinding. An unbound user stops receiving that platform's work notifications; re-running sync or a login-free visit re-binds automatically.
 
-<img src="/screenshots/im-bindings.png" alt="User IM binding management" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-bindings.webp" alt="User IM binding management" style="max-width:100%;border-radius:6px" />
 
 The "Generic directory source" card under "Your own systems" connects your own account system — see [below](#connect-your-own-system-generic-directory-source-optional).
 
@@ -156,7 +156,7 @@ Once bound, the next approval event lands in the member's IM:
 | Tapping a card inside WeCom | Silent OAuth (requires an ICP-filed trusted domain in the WeCom console) |
 | Feishu / browsers / everything else | One-time ticket link, works on all three platforms |
 
-<img src="/screenshots/im-landing.png" alt="Landing on the approval detail without signing in" style="max-width:100%;border-radius:6px" />
+<img src="/screenshots/im-landing.webp" alt="Landing on the approval detail without signing in" style="max-width:100%;border-radius:6px" />
 
 After landing, the page follows the device: mobile opens the mobile detail page, desktop opens the desktop app. **Approval actions must happen inside the system** — the card only carries an "Open" button, so every action stays attributable.
 
