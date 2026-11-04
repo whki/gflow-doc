@@ -39,7 +39,8 @@ aside: false
     <tr><td>规则链设计器</td><td class="pt-no">— 手写规则链 JSON</td><td class="pt-yes">✓ 可视化编排自动化规则链</td></tr>
     <tr><td>智能体（AI 审批）</td><td class="pt-no">— 自行实现</td><td class="pt-yes">✓ 模型 / 智能体 / 技能管理</td></tr>
     <tr><td colspan="3" class="price-section-title">产品化能力（商业版独有）</td></tr>
-    <tr><td>前端应用</td><td class="pt-no">— 自行开发</td><td class="pt-yes">✓ 发起/待办/已办/抄送/统计/跟踪</td></tr>
+    <tr><td>前端应用</td><td class="pt-no">— 自行开发</td><td class="pt-yes">✓ 发起/待办/已办/抄送/审批统计/跟踪</td></tr>
+    <tr><td><a href="/guide/features/form-data-stats">表单数据统计</a></td><td class="pt-no">— 自行开发报表</td><td class="pt-yes">✓ 零配置看板 · 数字合计/选项占比 · 按部门/发起人/月份透视 · 导出统计报告</td></tr>
     <tr><td>自动化编排界面</td><td class="pt-no">— 自行实现</td><td class="pt-yes">✓ 触发器 + HTTP/服务任务配置</td></tr>
     <tr><td>组织架构 / 用户 / 角色 / 岗位</td><td class="pt-no">— 自行实现 IdentityService</td><td class="pt-yes">✓ 完整后台</td></tr>
     <tr><td>监控 / 通知 / 操作审计</td><td class="pt-no">— 监听器回调自建</td><td class="pt-yes">✓ 内置</td></tr>

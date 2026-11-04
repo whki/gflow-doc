@@ -78,6 +78,13 @@ const caps = computed(() =>
           desc: 'To-dos and CCs pushed straight into DingTalk / WeCom / Feishu; tap the card, land login-free, approve on the phone. Directory sync binds accounts automatically.',
           tags: ['dingtalk-work', 'wecom-work', 'feishu-work'],
         },
+        {
+          icon: '▦',
+          red: false,
+          title: 'Form Data Statistics',
+          desc: 'Pick a process and a full statistics dashboard appears automatically: sums and averages for numeric fields, option distributions, pivots by department, submitter or month — zero config, one-click report export.',
+          tags: ['zero-config', 'pivot', 'report export'],
+        },
       ]
     : [
         {
@@ -149,6 +156,13 @@ const caps = computed(() =>
           title: 'IM 工作通知',
           desc: '待办、抄送实时推送到钉钉 / 企微 / 飞书，点卡片免登直达单据，手机上点开就批；通讯录同步自动绑定。',
           tags: ['dingtalk-work', 'wecom-work', 'feishu-work'],
+        },
+        {
+          icon: '▦',
+          red: false,
+          title: '表单数据统计',
+          desc: '选一个流程自动生成整版统计看板：数字字段合计/均值、选项字段占比、按部门/发起人/月份分组透视，零配置，一键导出统计报告。',
+          tags: ['零配置', '分组透视', '导出报告'],
         },
       ]
 )

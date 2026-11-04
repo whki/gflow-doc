@@ -39,7 +39,8 @@ aside: false
     <tr><td>Rule Chain Designer</td><td class="pt-no">— hand-write rule chain JSON</td><td class="pt-yes">✓ visually orchestrate automation rule chains</td></tr>
     <tr><td>AI Agent (AI approval)</td><td class="pt-no">— implement it yourself</td><td class="pt-yes">✓ model / agent / skill management</td></tr>
     <tr><td colspan="3" class="price-section-title">Product-grade capabilities (commercial edition only)</td></tr>
-    <tr><td>Frontend app</td><td class="pt-no">— build your own</td><td class="pt-yes">✓ initiate / todo / done / CC / stats / tracking</td></tr>
+    <tr><td>Frontend app</td><td class="pt-no">— build your own</td><td class="pt-yes">✓ initiate / todo / done / CC / approval stats / tracking</td></tr>
+    <tr><td><a href="/en/guide/features/form-data-stats">Form data statistics</a></td><td class="pt-no">— build your own reports</td><td class="pt-yes">✓ zero-config dashboards · numeric sums / option distributions · pivots by department, submitter, month · report export</td></tr>
     <tr><td>Automation orchestration UI</td><td class="pt-no">— implement it yourself</td><td class="pt-yes">✓ triggers + HTTP / service task configuration</td></tr>
     <tr><td>Organization / users / roles / positions</td><td class="pt-no">— implement IdentityService yourself</td><td class="pt-yes">✓ full admin backend</td></tr>
     <tr><td>Monitoring / notifications / operation audit</td><td class="pt-no">— build your own from listener callbacks</td><td class="pt-yes">✓ built in</td></tr>
