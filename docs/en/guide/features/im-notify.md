@@ -134,9 +134,28 @@ On the active platform card (the green "Active" one), click **Sync now**; the su
 
 > Re-running a sync resets all counters to zero — sync is idempotent and never duplicates data.
 
+- **Schedule**: a full sync runs automatically once a day at 2:00 AM (server time), with automatic retry later in the day if it fails; you can also trigger one anytime with "Sync now". Multi-instance deployments never run it twice.
 - Pulls the full org tree and members and **binds automatically by mobile number**; unmatched counts are shown in the sync result.
 - Unmatched > 0: fill in the user's mobile number under System Management → Organization → run sync again (idempotent, safe to re-run).
-- A full sync runs automatically every night; leavers are disabled (never deleted — historical documents keep their references).
+- Leavers are disabled (never deleted — historical documents keep their references); their in-flight approvals are handed over automatically.
+
+#### Field permissions decide the sync result
+
+Name and mobile number are **two separate authorizations** on DingTalk/Feishu (DingTalk "Employee mobile number", Feishu `contact:user.phone:readonly`; the name comes with Feishu's "Read basic contact info"). Missing either one means the sync cannot read that field — after saving the configuration, GFlow samples the directory and tells you on the spot what is missing and where to enable it, instead of leaving you to debug after the nightly sync. On the card summary, "Unmatched N" counts members whose mobile number did not match; "Skipped (no name) N" counts members who could not be auto-provisioned because the platform returned no name.
+
+#### Auto-provision unmatched members
+
+Members present in the org but absent in GFlow get an account automatically during sync when "Auto-provision unmatched members" is on (**enabled by default for new configurations**; existing configurations keep whatever they saved):
+
+| Item | Behavior |
+| --- | --- |
+| Username | `{platform}_{external ID}` (e.g. `feishu_ou_xxx`); immutable after creation |
+| Password | Random and unknowable — password login is unavailable by default; daily sign-in is via IM login-free entry (open a card and you're in). After an admin resets the password, the account can also log in on the login page with its username **or mobile number** plus the password |
+| Profile | Name, avatar, mobile number and department membership (first = primary) are maintained by the daily sync |
+| Roles | None — no admin console access, approvals only |
+| Leaving | Disabled automatically once absent from the org, with in-flight approvals handed over; restored automatically on return |
+
+> Recommended rollout order: align existing accounts' mobile numbers with the IM directory first, then enable auto-provisioning — members whose number matches get "bound" rather than "provisioned", so nobody ends up with two accounts.
 
 Binding management: System Management → Organization → a user's "More → IM bindings" shows the binding status and allows unbinding. An unbound user stops receiving that platform's work notifications; re-running sync or a login-free visit re-binds automatically.
 
