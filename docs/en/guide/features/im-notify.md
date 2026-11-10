@@ -141,7 +141,7 @@ On the active platform card (the green "Active" one), click **Sync now**; the su
 
 #### Field permissions decide the sync result
 
-Name and mobile number are **two separate authorizations** on DingTalk/Feishu (DingTalk "Employee mobile number", Feishu `contact:user.phone:readonly`; the name comes with Feishu's "Read basic contact info"). Missing either one means the sync cannot read that field — after saving the configuration, GFlow samples the directory and tells you on the spot what is missing and where to enable it, instead of leaving you to debug after the nightly sync. On the card summary, "Unmatched N" counts members whose mobile number did not match; "Skipped (no name) N" counts members who could not be auto-provisioned because the platform returned no name.
+Name and mobile number are **two separate authorizations** on DingTalk/Feishu (DingTalk "Employee mobile number", Feishu `contact:user.phone:readonly`; the name comes with Feishu's "Read basic contact info"). Missing either one means the sync cannot read that field — after saving the configuration, GFlow samples the directory and tells you on the spot what is missing and where to enable it, instead of leaving you to debug after the nightly sync. On the card summary, "Unmatched N" counts members found in the org but not matched to an account (mobile number not aligned, or the platform returns no name/mobile fields — the post-save preflight tells you which).
 
 #### Auto-provision unmatched members
 
