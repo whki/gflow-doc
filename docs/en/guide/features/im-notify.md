@@ -123,7 +123,7 @@ Sign in to GFlow → **System Management → Integration Configuration** → the
 
 - **Enable**: puts the platform to work; if the secret is missing you'll be prompted to fill it first — otherwise sync and notifications won't work.
 - **Disable**: stops that platform's directory sync and message delivery; everything already synced (departments, accounts, bindings) is kept.
-- **Purge data**: removes user bindings synced from that platform and disables its synced departments and auto-provisioned accounts (historical approvals are untouched); a re-sync rebuilds them from the current org chart.
+- **Purge data**: removes user bindings synced from that platform and disables its synced departments and auto-provisioned accounts (historical approvals are untouched); a re-sync rebuilds them from the current org chart. Purging is idempotent — once the data is disabled, purging again reports "Nothing to purge: no active synced data for this source (already purged or disabled by sync)"; disabled departments appear greyed out with a "Disabled" tag in the Organization tree.
 - **Tenant isolation**: each tenant sees and configures only its own credentials on this page — there is no globally shared default configuration, and tenants cannot see each other's setups.
 
 ### Step 3: sync the directory, bind automatically
@@ -145,19 +145,21 @@ Name and mobile number are **two separate authorizations** on DingTalk/Feishu (D
 
 #### Auto-provision unmatched members
 
-Members present in the org but absent in GFlow get an account automatically during sync when "Auto-provision unmatched members" is on (**enabled by default for new configurations**; existing configurations keep whatever they saved):
+Members present in the org but absent in GFlow get an account automatically during sync when "Auto-provision unmatched members" is on (**enabled by default for new configurations**; existing configurations keep whatever they saved), and the account gets the role chosen in the "**Default role for synced accounts**" dropdown (default **USER** — the account can start and process approvals right away; pick another tenant role or "No role" to turn it off):
 
 | Item | Behavior |
 | --- | --- |
 | Username | `{platform}_{external ID}` (e.g. `feishu_ou_xxx`); immutable after creation |
 | Password | Random and unknowable — password login is unavailable by default; daily sign-in is via IM login-free entry (open a card and you're in). After an admin resets the password, the account can also log in on the login page with its username **or mobile number** plus the password |
 | Profile | Name, avatar, mobile number and department membership (first = primary) are maintained by the daily sync |
-| Roles | None — no admin console access, approvals only |
+| Roles | The configured default role is attached at creation (default USER, changeable or off); previously provisioned accounts that ended up with no role get the default role back on the next sync |
 | Leaving | Disabled automatically once absent from the org, with in-flight approvals handed over; restored automatically on return |
 
 > Recommended rollout order: align existing accounts' mobile numbers with the IM directory first, then enable auto-provisioning — members whose number matches get "bound" rather than "provisioned", so nobody ends up with two accounts.
 
 Binding management: System Management → Organization → a user's "More → IM bindings" shows the binding status and allows unbinding. An unbound user stops receiving that platform's work notifications; re-running sync or a login-free visit re-binds automatically.
+
+> When editing an auto-provisioned account (username prefixed `{platform}_`) in Organization: the username is read-only, and fields like email are no longer mandatory (synced accounts often have none) — an admin can change departments/roles and save directly. Such accounts are not meant for password login; they sign in via IM login-free entry or mobile number.
 
 <img src="/screenshots/im-bindings.webp" alt="User IM binding management" style="max-width:100%;border-radius:6px" />
 
@@ -249,7 +251,7 @@ Authorization: Bearer <token>
 | `mobile` | Phone number (optional); present numbers auto-bind matching gflow users, missing ones can be auto-provisioned |
 | `department_ids` | Departments the member belongs to (multiple allowed); **the first is the primary position**; empty = directly under the company root |
 
-On the "Generic directory source" card under "Your own systems", click Configure and enter the snapshot URL and access token; everything else matches the platform syncs (snapshot cap 16MB; oversized or failing responses fail the whole run and skip disabling, so existing users are never hurt by a glitch).
+On the "Generic directory source" card under "Your own systems", click Configure and enter the snapshot URL and access token; everything else matches the platform syncs — auto-provisioning and the default role for synced accounts are supported here too (default USER so a provisioned account can start approvals right away; "No role" turns it off; snapshot cap 16MB — oversized or failing responses fail the whole run and skip disabling, so existing users are never hurt by a glitch).
 
 Bindings created by this sync are immediately usable by **JWT mutual trust** login (next section) — no manual binding import needed.
 
