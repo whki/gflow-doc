@@ -41,7 +41,7 @@ Taking the approval node as an example:
 | Approver | Specific members / roles / direct supervisor / multi-level supervisor / initiator's choice / initiator (department candidate pools are supported by the engine DSL but not yet exposed in the designer) |
 | Approval method | Single / OR-sign / countersign (unanimous) / sequential / vote (majority · percentage · count); the vote threshold defaults to majority and can be fine-tuned by hand-writing `voteRule` JSON |
 | Form permissions | Per-field hidden / read-only / editable (written into the DSL `formPermissions`) |
-| Action permissions | Approve/reject are always available; every other action (transfer / return / delegate / add-remove sign / expedite / attachments) has its own toggle, off by default |
+| Action permissions | Approve/reject are always available; every other action (transfer / return / delegate / add-remove sign / expedite / comment / awaken) has its own toggle, off by default; "Upload attachment" lets handlers attach [evidence files](/en/guide/features/approval-actions#comment-attachments) in the approve/reject/return dialogs — attachments land with the comment row and show on the timeline |
 | Timeout | Deadline duration + overdue action (remind / auto-approve / auto-reject), measured from the moment each task is created and handled uniformly by gflow's scheduled sweeps |
 
 ## Field Permissions

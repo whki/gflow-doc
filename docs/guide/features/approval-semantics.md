@@ -164,6 +164,10 @@ flowchart LR
 - **转办**：任务转给他人办理，办理人变更，原审批人出局，新办理人审批即流转。留痕写入任务变量 `transfer_from` / `transfer_reason` / `transfer_time`
 - **委派**：受托人先行把关，`owner` 保留原拥有人、`delegate_from` 落表留痕。被委派人通过 / 拒绝后任务**不流转**，自动归还原审批人并通知（`TaskEventResolved`），审批意见保留在时间线；原审批人再审一次才出结果。委派禁止指派给自己
 
+### 意见附件
+
+通过 / 驳回 / 回退提交意见时可附带凭证文件（节点 `actionPermissions.uploadAttachment` 开关控制，缺省关）。附件引用以 JSON 数组随意见行**同事务**写入 `wf_task_comment.attachments`（`[{filename,path,size}]`，NULL = 无附件），文件本体落平台文件存储，读取经鉴权接口、不暴露直链；转办 / 委派 / 加签 / 减签等流转动作不接受附件（服务端拒绝），附件只属于「出意见」的动作。
+
 ### 签收 / 抢单
 
 角色/部门候选任务先到先签：候选池中任何人可签收（`claimed_at` 记录时间），签收后其他人不可再办。

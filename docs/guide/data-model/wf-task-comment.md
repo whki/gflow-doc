@@ -15,6 +15,7 @@
 | `user_id` | VARCHAR(64) | 评论人 ID |
 | `user_name` | VARCHAR(100) | 评论人姓名（冗余存储，避免联表） |
 | `content` | TEXT | 评论内容 |
+| `attachments` | TEXT NULL | 伴生附件引用 JSON 数组 `[{filename,path,size}]`，NULL = 无附件。通过/驳回/回退提交意见时可随意见附带凭证文件（需节点开启「上传附件」动作权限），附件与意见同事务写入；`path` 指向平台文件存储，读取走鉴权接口，不落公网直链 |
 | `created_at` | TIMESTAMPTZ | 创建时间 |
 
 索引：`task_id`、`tenant_id`。

@@ -21,6 +21,8 @@ When a handler opens a document under "My Approvals", the high-frequency **Appro
 | Withdraw | Initiator | Instance in flight | Instance terminates; the form can be revised and resubmitted |
 | Urge | Initiator / admin | urge enabled in designer | The handler gets a reminder; status unchanged |
 
+Approve / Reject / Return comments can also carry [comment attachments](#comment-attachments) (requires the node's "Upload attachment" action permission in the designer).
+
 ## Transfer vs. Delegate
 
 Both hand the document to someone else — the difference is **who makes the final call**:
@@ -49,9 +51,17 @@ When the previous step was approved in error, use "Return" to send the document 
 - The returned task is marked as returned, the target node gets a fresh todo, and form data and variables travel back with it
 - To send work back to the initiator, use "Reject" with the node's reject configured as `reject.strategy: toStarter`
 
+## Comment attachments
+
+When an approval comment needs evidence (a signed scan, a test report, a chat screenshot), enable **Upload attachment** in the node's "Action permissions" in the process designer (off by default); handlers can then attach files in the **Approve / Reject / Return** dialogs:
+
+- Attachments are committed in the same transaction as the comment and appear on the approval timeline with the comment row — click to preview / download through authenticated access; nobody outside the flow gets a working link
+- Transfer / Delegate / Add-sign / Remove-sign do not carry attachments (rejected by the server): attachments belong to the "cast a comment" actions only, so routing actions never smuggle files
+- Attachment **fields** in the form (controlled by field permissions) are a separate feature: those are application materials, these are approval evidence
+
 ## Add-sign and Remove-sign
 
-**Add-sign**: when more review is needed mid-flow, insert new approvers ahead of your own step (before add-sign). You get to decide only after every added signer has reviewed; while waiting, your Approve / Reject buttons are disabled with a hint showing who is still pending.
+**Add-sign**: when more review is needed mid-flow, insert new approvers ahead of your own step (before add-sign). You get to decide only after every added signer has reviewed; while waiting, your Approve / Reject buttons are disabled with a hint showing who is still pending. Added signers immediately receive a "Waiting for your approval" notification (in-app + IM card on enabled channels), the same pipeline as regular todos.
 
 **Remove-sign**: someone was added by mistake, or a countersigner has been sitting on the task — remove add-sign / countersign members who have **not yet acted**:
 
