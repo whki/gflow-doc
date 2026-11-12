@@ -84,9 +84,26 @@ GFlow Platform 支持多实例 active-active 集群部署：同一份代码同�
 
 ## 数据库初始化
 
-- **GFlow Platform**：postgres 容器首启自动按序执行 `scripts/engine/00.init_bpm_pg.sql`（引擎 7 张表）与 `scripts/00.init_pg.sql`（应用系统表 + 种子）；裸机部署用 `make db-init`（scripts/init-db.sh）完成同样动作——**程序启动不建核心表，两个脚本缺一不可**
+- **GFlow Platform**：postgres 容器首启自动按序执行 `scripts/engine/00.init_bpm_pg.sql`（引擎 7 张表）与 `scripts/00.init_pg.sql`（应用系统表 + 种子）；裸机部署用 `make db-init`（scripts/init-db.sh）完成同样动作——**程序启动不建核心表，两个脚本缺一不可**；初始化之后的增量 schema 变更由启动期自动迁移接管，见下文[升级与自动迁移](#升级与自动迁移)
 - **仅引擎**：执行 gflow-engine 的 `scripts/00.init_bpm_pg.sql` / `00.init_bpm_mysql.sql`
 - **非内置数据库（达梦、人大金仓等）**：经 `DialectProvider` 扩展接入，见[自定义数据库方言](/guide/deployment/custom-dialect)
+
+## 升级与自动迁移
+
+替换二进制重启即完成升级——**schema 增量由启动期版本化 SQL 迁移自动执行**，不再需要手工跑 patch 脚本：
+
+1. 停旧进程（或滚动停一个副本），替换 `gflow-server`，重启。
+2. 启动时与 `schema_migrations` 账本比对，按版本序号自动执行未应用的迁移；多副本部署靠数据库锁互斥，同一版本恰好执行一次。
+3. 任一语句失败即拒绝启动（不吞错、不留半截 schema），修复后重启续跑；此前手工先跑过补丁的库，"列已存在"类错误按已应用对账，不重复执行。
+
+- **首次部署仍先 `make db-init`**：迁移管理的是基线之后的**增量**版本，不替代初始化脚本。
+- 账本按基线哨兵起账：基线之前的历史 patch 一概不重放；从未打过补丁的存量库首次启动会按序自动补齐。
+- 已应用版本的脚本事后被改动（checksum 漂移）同样拒绝启动，防止两套迁移清单分叉。
+- 配置开关（`configs/config.yaml` 的 `migration` 段）：
+  - `mode: auto`（默认）——启动自动应用；
+  - `mode: manual`——只读检查并打印待应用清单，不执行（DBA 环境手工执行时用）；
+  - `mode: off`——完全跳过迁移检查；
+  - `lock_timeout`——账本锁等待时长（默认 30 秒）。
 
 ## 环境要求
 

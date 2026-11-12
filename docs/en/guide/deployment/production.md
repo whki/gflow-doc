@@ -86,9 +86,26 @@ Dependencies: shared PostgreSQL/MySQL + Redis (AOF persistence recommended) + a 
 
 ## Database Initialization
 
-- **GFlow Platform**: the postgres container automatically executes `scripts/engine/00.init_bpm_pg.sql` (7 engine tables) and `scripts/00.init_pg.sql` (application system tables + seed data) in order on first startup; for bare-metal deployments, run `make db-init` (scripts/init-db.sh) to do the same — **program startup does not create the core tables; both scripts are required**
+- **GFlow Platform**: the postgres container automatically executes `scripts/engine/00.init_bpm_pg.sql` (7 engine tables) and `scripts/00.init_pg.sql` (application system tables + seed data) in order on first startup; for bare-metal deployments, run `make db-init` (scripts/init-db.sh) to do the same — **program startup does not create the core tables; both scripts are required**. Incremental schema changes after initialization are handled by startup auto-migration — see [Upgrade & Auto-Migration](#upgrade-auto-migration) below
 - **Engine only**: run gflow-engine's `scripts/00.init_bpm_pg.sql` / `00.init_bpm_mysql.sql`
 - **Non-built-in databases (DM, KingbaseES, etc.)**: integrate via the `DialectProvider` extension point — see [Custom Database Dialects](/en/guide/deployment/custom-dialect)
+
+## Upgrade & Auto-Migration
+
+Replace the binary and restart — that's the whole upgrade. **Incremental schema changes are applied automatically by versioned SQL migrations at startup**; no manual patch scripts anymore:
+
+1. Stop the old process (or roll one replica at a time), replace `gflow-server`, restart.
+2. At startup the binary compares against the `schema_migrations` ledger and applies any pending versions in order; multi-replica deployments serialize through a database lock so each version runs exactly once.
+3. Any failing statement refuses startup (no swallowed errors, no half-applied schema); fix and restart to resume. Databases where the patch was already applied manually are reconciled — "already exists" errors count as applied and are not re-run.
+
+- **First deployment still needs `make db-init`**: migrations manage *incremental* versions after the baseline; they do not replace the initialization scripts.
+- The ledger starts from a baseline sentinel: historical patches before the baseline are never replayed; a stock database that never received patches catches up automatically in order on first startup.
+- If an already-applied script is modified afterwards (checksum drift), startup is refused as well — preventing two diverging migration lists.
+- Configuration switches (the `migration` section of `configs/config.yaml`):
+  - `mode: auto` (default) — apply automatically at startup;
+  - `mode: manual` — read-only check that prints the pending list without executing (for DBA-managed environments);
+  - `mode: off` — skip migration checks entirely;
+  - `lock_timeout` — ledger lock wait (default 30 seconds).
 
 ## Requirements
 
