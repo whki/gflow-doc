@@ -90,6 +90,12 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 Other actions: `reject`, `return`, `transfer`, `delegate`, `resolve`, `add-sign` / `reduce-sign`, `claim` / `unclaim`, `urge`, `withdraw`, and instance-level `recall`.
 
+## Time Field Contract
+
+- **Responses**: every time field (timeline `endedAt` / `claimedAt`, node approver `approvalTime` / `createdAt`, webhook payload `occurredAt`, etc.) is uniformly **RFC3339 with an explicit UTC offset**, e.g. `2026-11-13T10:49:50+08:00` (UTC deployments emit `2026-11-13T02:49:50Z`). Parse with any standard ISO parser to get the exact instant; convert to your display timezone as needed. The server's deployment timezone never changes the meaning.
+- **Filter parameters**: instant-accepting parameters (`createdAfter` / `createdBefore`, `dueDateBefore`, …) take RFC3339. To filter "a specific day", compute the civil-day boundary yourself (e.g. Beijing midnight = `2026-11-12T16:00:00Z`) so the semantics don't depend on the server timezone.
+- **Civil-day aggregates**: "today / this week" KPIs and `startDate` / `endDate` style date strings in task / form statistics are sliced by the server (or the configured business timezone). On cross-timezone deployments prefer RFC3339 instants over bare date strings.
+
 ## Terminal-State Awareness
 
 | Option | How | Latency | Fits |

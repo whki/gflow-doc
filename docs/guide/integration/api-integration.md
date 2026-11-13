@@ -176,6 +176,12 @@ curl -H "Authorization: Bearer $TOKEN" \
 | 收回自己的一票 | `POST /api/v1/workflow/process-instances/{id}/recall` | `{ "reason": "…" }`（收回语义见[审批动作指南](/guide/features/approval-actions)） |
 | 管理员代审 | `POST /{id}/proxy-approve` · `/{id}/proxy-reject` | `{ "comment": "…" }`（comment 必填，权限 `workflow:task:proxy`） |
 
+## 时间字段口径
+
+- **返回值**：全部时间字段（时间线 `endedAt` / `claimedAt`、节点审批名单 `approvalTime` / `createdAt`、Webhook 载荷 `occurredAt` 等）统一为 **RFC3339 带时区偏移**，如 `2026-11-13T10:49:50+08:00`（UTC 部署输出 `2026-11-13T02:49:50Z`）。用标准 ISO 解析即得精确时刻，展示时区由消费方自行换算；服务器部署时区不影响数值语义。
+- **过滤参数**：接受时刻的参数（`createdAfter` / `createdBefore`、`dueDateBefore` 等）传 RFC3339。按「某一天」筛选时建议自行计算民用日边界再传入（如北京 0 点 = `2026-11-12T16:00:00Z`），语义不依赖服务器时区。
+- **民用日聚合**：任务 / 表单统计的「今日 / 本周」KPI 与 `startDate` / `endDate` 类日期字符串按服务器（或部署配置的业务时区）切日；跨时区部署请优先用 RFC3339 时刻替代裸日期字符串。
+
 ## 终态感知：三方案对比
 
 你的系统怎么知道「这单批完了」？三个方案按需选择，可组合：
